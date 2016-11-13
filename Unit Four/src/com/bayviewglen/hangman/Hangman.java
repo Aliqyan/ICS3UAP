@@ -152,8 +152,7 @@ public class Hangman {
 
 			if (guesses == MAX_GUESSES) {
 				notChecked = true;
-				System.out.print(
-						currentPlayer + ", you have used up your guesses. Please enter your solution: ");
+				System.out.print(currentPlayer + ", you have used up your guesses. Please enter your solution: ");
 				guess = keyboard.nextLine().toUpperCase();
 				while (notChecked) {
 					notChecked = false;
@@ -170,12 +169,12 @@ public class Hangman {
 					System.out.println("Correct");
 				} else {
 					System.out.println("Wrong");
-					guesses ++;
+					guesses++;
 				}
 			}
 
 			if (rounds % 2 == 0)
-				p1Points += MAX_POINTS - guesses;	
+				p1Points += MAX_POINTS - guesses;
 			else if (rounds % 2 == 1)
 				p2Points += MAX_POINTS - guesses;
 
