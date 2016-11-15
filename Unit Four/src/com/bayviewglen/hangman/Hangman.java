@@ -29,7 +29,8 @@ public class Hangman {
 		final int isPlayer1Turn = 0;
 		final int isPlayer2Turn = 1;
 		final int missingIndex = -1;
-
+		final int oneCharOver = 1;
+		final int numSpaceLines = 30;
 		int guesses;
 		int rounds = 0;
 		boolean gameOver = false;
@@ -46,7 +47,6 @@ public class Hangman {
 
 			System.out.print(opposingPlayer + ", please enter an alphanumeric message to be guessed: ");
 			message = keyboard.nextLine().toUpperCase();
-			System.out.println(message);
 			boolean notChecked = true;
 			while (notChecked) {
 				notChecked = false;
@@ -59,14 +59,20 @@ public class Hangman {
 					}
 				}
 			}
+			for (int i = 0; i < numSpaceLines; i++){
+				System.out.println();
+			}
 			for (int i = 0; i < message.length(); i++) {
 				if (message.charAt(i) == ' ')
-					coded += "/ ";
+					coded += "/";
 				else
-					coded += "_ ";
+					coded += "_";
 			}
-
-			System.out.println(coded);
+			
+			for(int i = 0; i < coded.length();i++){
+				System.out.print(coded.charAt(i) + " ");
+			}
+			System.out.println();
 			boolean roundOn = true;
 			while (guesses < MAX_GUESSES && roundOn) {
 				System.out.print(currentPlayer + ", you have used " + guesses
@@ -100,6 +106,7 @@ public class Hangman {
 					}
 
 				} else if (inputChoice.equals("2")) {
+					System.out.print("Unused Characters: ");
 					for (int i = 0; i < possibleGuesses.length(); i++) {
 						System.out.print(possibleGuesses.charAt(i) + " ");
 
@@ -122,20 +129,28 @@ public class Hangman {
 							guess = keyboard.nextLine().toUpperCase();
 						} else {
 							notChecked = false;
-							possibleGuesses = possibleGuesses.substring(0, possibleGuesses.indexOf(guess)) + " "
-									+ possibleGuesses.substring(possibleGuesses.indexOf(guess) + 1);
+							possibleGuesses = possibleGuesses.substring(0, possibleGuesses.indexOf(guess)) + "_"
+									+ possibleGuesses.substring(possibleGuesses.indexOf(guess) + oneCharOver);
 						}
 					
 
 					}
-					if (message.indexOf(guess) != missingIndex) {
-						coded = coded.substring(0, 2 * message.indexOf(guess)) + guess
-								+ coded.substring(2 * message.indexOf(guess) + 1);
+					for(int i = 0; i < coded.length(); i++){					
+					if (message.substring(i, i + oneCharOver).equals(guess)) 
+						coded = coded.substring(0, i) + guess + coded.substring(i + oneCharOver);
+					}	
+					
+					if(message.indexOf(guess) != missingIndex)	
 						System.out.println(currentPlayer + ", the character '" + guess + "' is in the string!");
-					} else {
+					else
 						System.out.println(currentPlayer + ", the character '" + guess + "' is not in the string.");
+					
+					
+					for(int i = 0; i < coded.length();i++){
+						System.out.print(coded.charAt(i) + " ");
 					}
-					System.out.println(coded);
+					System.out.println();
+					
 					guesses++;
 				}
 			}
