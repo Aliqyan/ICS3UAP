@@ -102,22 +102,21 @@ public class Hangman {
 					guess = keyboard.nextLine().toUpperCase();
 					notChecked = true;
 					while (notChecked) {
+						
+						if (ALPHANUMERALS_NO_SPACES.indexOf(guess) == -1) {
+							System.out.print("ERROR --> " + currentPlayer
+									+ ", please either guess a letter or the message(using  ALPHANUMERIC charcters): ");
+							guess = keyboard.nextLine().toUpperCase();
+						} else if (possibleGuesses.indexOf(guess) == -1) {
+							System.out.print("ERROR --> " + currentPlayer
+									+ ", please either guess a letter or the message(THAT YOU HAVEN'T BEFORE): ");
+							guess = keyboard.nextLine().toUpperCase();
+						} else {
+							notChecked = false;
+							possibleGuesses = possibleGuesses.substring(0, possibleGuesses.indexOf(guess)) + " "
+									+ possibleGuesses.substring(possibleGuesses.indexOf(guess) + 1);
+						}
 						/*
-						 * if (ALPHANUMERALS_NO_SPACES.indexOf(guess) == -1) {
-						 * System.out.print("ERROR --> " + currentPlayer +
-						 * ", please either guess a letter or the message(using  ALPHANUMERIC charcters): "
-						 * ); guess = keyboard.nextLine().toUpperCase(); } else
-						 * if (possibleGuesses.indexOf(guess) == -1) {
-						 * System.out.print("ERROR --> " + currentPlayer +
-						 * ", please either guess a letter or the message(THAT YOU HAVEN'T BEFORE): "
-						 * ); guess = keyboard.nextLine().toUpperCase(); } else
-						 * { notChecked = false; possibleGuesses =
-						 * possibleGuesses.substring(0,
-						 * possibleGuesses.indexOf(guess)) + " " +
-						 * possibleGuesses.substring(possibleGuesses.indexOf(
-						 * guess) + 1); }
-						 */
-
 						if (ALPHANUMERALS_NO_SPACES.indexOf(guess) > -1) {
 							notChecked = false;
 							possibleGuesses = possibleGuesses.substring(0, possibleGuesses.indexOf(guess)) + " "
@@ -136,11 +135,12 @@ public class Hangman {
 							guess = keyboard.nextLine().toUpperCase();
 
 						}
+						*/
 
 					}
-					if (coded.indexOf(guess) != -1) {
-						coded = coded.substring(0, 2 * coded.indexOf(guess)) + guess
-								+ coded.substring(2 * coded.indexOf(guess) + 1);
+					if (message.indexOf(guess) != -1) {
+						coded = coded.substring(0, 2 * message.indexOf(guess)) + guess
+								+ coded.substring(2 * message.indexOf(guess) + 1);
 						System.out.println(currentPlayer + ", the character '" + guess + "' is in the string!");
 					} else {
 						System.out.println(currentPlayer + ", the character '" + guess + "' is not in the string.");
