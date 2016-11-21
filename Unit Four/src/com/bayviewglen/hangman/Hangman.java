@@ -33,10 +33,10 @@ public class Hangman {
 		//prompt player for names
 		Scanner keyboard = new Scanner(System.in);
 		System.out.print("Player One, Please enter your first name: ");
-		String p1Name = keyboard.nextLine();
+		String p1Name = keyboard.nextLine().trim();
 
 		System.out.print("Player Two, Please enter your first name: ");
-		String p2Name = keyboard.nextLine();
+		String p2Name = keyboard.nextLine().trim();
 		
 		//run the loop until a player wins for a maximum of 10 times 
 		boolean gameOver = false;
@@ -56,17 +56,23 @@ public class Hangman {
 			}
 
 			System.out.print(opposingPlayer + ", please enter an alphanumeric message to be guessed: ");
-			message = keyboard.nextLine().toUpperCase();
 			//check if only alphanumeric characters used 
 			boolean notChecked = true;
 			while (notChecked) {
+				message = keyboard.nextLine().toUpperCase().trim();
+
 				notChecked = false;
+				if(message.length() == 0){
+					System.out.print("ERROR --> " + opposingPlayer
+							+ ", please enter A message to be guessed: ");
+					notChecked = true;
+				}
 				for (int i = 0; i < message.length(); i++) {
-					if (ALPHANUMERALS.indexOf(message.charAt(i)) == MISSING_INDEX) {
+					 if(ALPHANUMERALS.indexOf(message.charAt(i)) == MISSING_INDEX) {
 						System.out.print("ERROR --> " + opposingPlayer
 								+ ", please enter an ALPHANUMERIC message to be guessed: ");
-						message = keyboard.nextLine().toUpperCase();
 						notChecked = true;
+						break;
 					}
 				}
 			}
@@ -102,17 +108,17 @@ public class Hangman {
 				//to solve message
 				if (inputChoice.equals("1")) {
 					System.out.print(currentPlayer + ", please enter your solution: ");
-					guess = keyboard.nextLine().toUpperCase();
 					//check alpha numeric
 					notChecked = true;
-					while (notChecked) {
+					while (notChecked){
+						guess = keyboard.nextLine().toUpperCase().trim();
 						notChecked = false;
 						for (int i = 0; i < guess.length(); i++) {
 							if (ALPHANUMERALS.indexOf(guess.charAt(i)) == MISSING_INDEX) {
 								System.out.print(
 										"ERROR --> " + currentPlayer + ", please enter an ALPHANUMERIC solution: ");
-								guess = keyboard.nextLine().toUpperCase();
 								notChecked = true;
+								break;
 							}
 						}
 					}
@@ -120,9 +126,9 @@ public class Hangman {
 					if (guess.equals(message)) {
 						System.out.println(currentPlayer + ", you are correct!");
 						roundOn = false;
+						guesses --;
 					} else {
 						System.out.println(currentPlayer + ", you are unfortunately incorrect!");
-						guesses++;
 					}
 				// to solve for character guess
 				} else if (inputChoice.equals("2")) {
@@ -132,21 +138,18 @@ public class Hangman {
 
 					}
 					System.out.print("\n" + currentPlayer + ", please guess a single character: ");
-					guess = keyboard.nextLine().toUpperCase();
 					//check if character is alphanumeric && length of 1 && not used prior
 					notChecked = true;
 					while (notChecked) {
+						guess = keyboard.nextLine().toUpperCase().trim();
 						if (ALPHANUMERALS_NO_SPACES.indexOf(guess) == MISSING_INDEX) {
 							System.out.print("ERROR --> " + currentPlayer
-									+ ", please either guess a letter or the message(using  ALPHANUMERIC charcters): ");
-							guess = keyboard.nextLine().toUpperCase();
-						}else if (guess.length() > 1){
+									+ ", please guess a single character(using ALPHANUMERIC charcters, NOT INCLUDING SPACES): ");
+						}else if (guess.length() > 1 || guess.length() < 1){
 							System.out.print("ERROR --> " + currentPlayer + ", please guess A letter: "); 
-							guess = keyboard.nextLine().toUpperCase();
 						}else if (possibleGuesses.indexOf(guess) == MISSING_INDEX) {
 							System.out.print("ERROR --> " + currentPlayer
-									+ ", please either guess a letter or the message(THAT YOU HAVEN'T BEFORE): ");
-							guess = keyboard.nextLine().toUpperCase();
+									+ ", please either guess a letter(THAT YOU HAVEN'T BEFORE): ");
 						} else {
 							notChecked = false;
 							possibleGuesses = possibleGuesses.substring(STARTING_CHAR, possibleGuesses.indexOf(guess)) + "_"
@@ -175,17 +178,26 @@ public class Hangman {
 					for(int i = 0; i < coded.length();i++){
 						System.out.print(coded.charAt(i) + " ");
 					}
-					System.out.println();
 					
-					guesses++;
+					System.out.println();
+					if(coded.indexOf("_") == MISSING_INDEX){
+						System.out.println("You won!");
+						guesses --;
+						roundOn = false;
+					}
+					
+					
+					
 				}
+				guesses++;
 			}
 			// last guess - player must enter a solution
 			if (guesses == MAX_GUESSES) {
 				System.out.print(currentPlayer + ", you have used up your guesses. Please enter your solution: ");
-				guess = keyboard.nextLine().toUpperCase();
 				notChecked = true;
 				while (notChecked) {
+					guess = keyboard.nextLine().toUpperCase();
+
 					notChecked = false;
 					for (int i = 0; i < guess.length(); i++) {
 						if (ALPHANUMERALS.indexOf(message.charAt(i)) == MISSING_INDEX) {
@@ -198,9 +210,9 @@ public class Hangman {
 				}
 				if (guess.equals(message)) {
 					System.out.println("Correct");
+					guesses --;
 				} else {
 					System.out.println("Wrong");
-					guesses++;
 				}
 			}
 			
