@@ -17,7 +17,9 @@ public class Hangman {
 		final int ONE_CHAR_OVER = 1;
 		final int NUM_SPACE_LINES = 30;
 		final int STARTING_CHAR = 0;
-		final int MAX_ROUNDS = 10;
+		final int MAX_ROUNDS = 5;
+		final int TURNS_IN_ROUND = 2;
+		final int FINISHED_ROUNDS = 0;
 		
 		String possibleGuesses = "";
 		String message = null;
@@ -28,7 +30,10 @@ public class Hangman {
 		int p1Points = 0;
 		int p2Points = 0;
 		int guesses;
+		int turns = 1;
 		int rounds = 1;
+		
+		
 		
 		//prompt player for names
 		Scanner keyboard = new Scanner(System.in);
@@ -41,19 +46,21 @@ public class Hangman {
 		//run the loop until a player wins for a maximum of 10 times 
 		boolean gameOver = false;
 		while (!gameOver) {
-			System.out.println("------------------------- Round " + rounds + " ------------------------- ");
+			
+			//determine each players roles 
+			if (turns % PLAYER_DECIDER == IS_PLAYER_1_TURN) {
+				currentPlayer = p1Name;
+				opposingPlayer = p2Name;
+			} else if (turns % PLAYER_DECIDER == IS_PLAYER_2_TURN) {
+				currentPlayer = p2Name;
+				opposingPlayer = p1Name;
+			}
+			System.out.println("------------------------- Round " + rounds + ": " + currentPlayer + "'s turn ------------------------- ");
 			possibleGuesses = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 			guesses = 0;
 			coded = "";
 			
-			//determine each players roles 
-			if (rounds % PLAYER_DECIDER == IS_PLAYER_1_TURN) {
-				currentPlayer = p1Name;
-				opposingPlayer = p2Name;
-			} else if (rounds % PLAYER_DECIDER == IS_PLAYER_2_TURN) {
-				currentPlayer = p2Name;
-				opposingPlayer = p1Name;
-			}
+			
 
 			System.out.print(opposingPlayer + ", please enter an alphanumeric message to be guessed: ");
 			//check if only alphanumeric characters used 
@@ -210,24 +217,29 @@ public class Hangman {
 				}
 				if (guess.equals(message)) {
 					System.out.println("Correct");
-					guesses --;
 				} else {
 					System.out.println("Wrong");
+					guesses ++;
+					
 				}
 			}
 			
 			//assign points to respective players
-			if (rounds % PLAYER_DECIDER == IS_PLAYER_1_TURN)
+			if (turns % PLAYER_DECIDER == IS_PLAYER_1_TURN){
 				p1Points += MAX_POINTS - guesses;
-			else if (rounds % PLAYER_DECIDER == IS_PLAYER_2_TURN)
+			}
+			else if (turns % PLAYER_DECIDER == IS_PLAYER_2_TURN){
 				p2Points += MAX_POINTS - guesses;
+				rounds ++;
+				
+			}
 
 			System.out.println("Total player points");
 			System.out.println(p1Name + ": \t" + p1Points);
 			System.out.println(p2Name + ": \t" + p2Points);
 			
 			//determine who wins, and if tie breaker is necessary
-			if (rounds >= MAX_ROUNDS) {
+			if (turns % TURNS_IN_ROUND == FINISHED_ROUNDS && rounds > MAX_ROUNDS) {
 				if (p1Points > p2Points) {
 					System.out.println("Congratulations " + p1Name + ", you won!!");
 					gameOver = true;
@@ -238,7 +250,8 @@ public class Hangman {
 					System.out.println("You have tied. The next round will be the tie breaker");
 				}
 			}
-			rounds++;
+			
+			turns++;
 
 		}
 		keyboard.close();
