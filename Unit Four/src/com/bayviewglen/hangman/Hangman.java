@@ -115,8 +115,8 @@ public class Hangman {
 					while (notChecked) {
 						guess = keyboard.nextLine().toUpperCase().trim();
 						notChecked = false;
-						if (guess.length() == 0) {
-							System.out.print("ERROR --> " + opposingPlayer + ", please enter A guess: ");
+						if (guess.length() < LENGTH_ONE) {
+							System.out.print("ERROR --> " + currentPlayer + ", please enter A guess: ");
 							notChecked = true;
 						}
 						for (int i = 0; i < guess.length(); i++) {
