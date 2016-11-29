@@ -19,6 +19,7 @@ public class Hangman {
 		final int MAX_ROUNDS = 5;
 		final int TURNS_IN_ROUND = 2;
 		final int FINISHED_ROUNDS = 0;
+		final int LENGTH_ONE = 1;
 
 		String message = null;
 		String guess = null;
@@ -61,7 +62,7 @@ public class Hangman {
 			while (notChecked) {
 				message = keyboard.nextLine().toUpperCase().trim();
 				notChecked = false;
-				if (message.length() == 0) {
+				if (message.length() < LENGTH_ONE) {
 					System.out.print("ERROR --> " + opposingPlayer + ", please enter A message to be guessed: ");
 					notChecked = true;
 				}
@@ -100,10 +101,10 @@ public class Hangman {
 				// Determine if player wants to guess message or letter
 				System.out.print(currentPlayer + ", you have used " + guesses
 						+ " guesses, would you like to (1) solve or (2) guess a character: ");
-				String inputChoice = keyboard.nextLine();
+				String inputChoice = keyboard.nextLine().trim();
 				while (!(inputChoice.equals("1") || inputChoice.equals("2"))) {
 					System.out.print(currentPlayer + ", you must enter (1) solve or (2) guess a character: ");
-					inputChoice = keyboard.nextLine();
+					inputChoice = keyboard.nextLine().trim();
 				}
 
 				// Player decides to solve message
@@ -114,6 +115,10 @@ public class Hangman {
 					while (notChecked) {
 						guess = keyboard.nextLine().toUpperCase().trim();
 						notChecked = false;
+						if (guess.length() == 0) {
+							System.out.print("ERROR --> " + opposingPlayer + ", please enter A guess: ");
+							notChecked = true;
+						}
 						for (int i = 0; i < guess.length(); i++) {
 							if (ALPHANUMERALS.indexOf(guess.charAt(i)) == MISSING_INDEX) {
 								System.out.print(
@@ -148,11 +153,11 @@ public class Hangman {
 						if (ALPHANUMERALS.indexOf(guess) == MISSING_INDEX) {
 							System.out.print("ERROR --> " + currentPlayer
 									+ ", please guess a single character(using ALPHANUMERIC charcters, NOT INCLUDING SPACES): ");
-						} else if (guess.length() > 1 || guess.length() < 1) {
+						} else if (guess.length() != LENGTH_ONE) {
 							System.out.print("ERROR --> " + currentPlayer + ", please guess A letter: ");
 						} else if (possibleGuesses.indexOf(guess) == MISSING_INDEX) {
 							System.out.print("ERROR --> " + currentPlayer
-									+ ", please either guess a letter(THAT YOU HAVEN'T BEFORE): ");
+									+ ", please  guess a letter(THAT YOU HAVEN'T BEFORE): ");
 						} else {
 							notChecked = false;
 							possibleGuesses = possibleGuesses.substring(STARTING_CHAR, possibleGuesses.indexOf(guess))
