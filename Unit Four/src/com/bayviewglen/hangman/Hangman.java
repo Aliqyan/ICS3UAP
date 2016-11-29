@@ -14,7 +14,7 @@ public class Hangman {
 		final int IS_PLAYER_2_TURN = 0;
 		final int MISSING_INDEX = -1;
 		final int ONE_CHAR_OVER = 1;
-		final int NUM_SPACE_LINES = 30;
+		final int NUM_SPACE_LINES = 48;
 		final int STARTING_CHAR = 0;
 		final int MAX_ROUNDS = 5;
 		final int TURNS_IN_ROUND = 2;
@@ -186,7 +186,7 @@ public class Hangman {
 					// check if all characters in the message have been guessed
 					System.out.println();
 					if (coded.indexOf("_") == MISSING_INDEX) {
-						System.out.println("You won!");
+						System.out.println("You have guessed all the letters in the phrase!");
 						guesses--;
 						roundOn = false;
 					}
@@ -248,13 +248,10 @@ public class Hangman {
 					System.out.println("You have tied. The next round will be the tie breaker");
 				}
 			}
-
 			// increase the turns
 			turns++;
-
 		}
 		// close keyboard
 		keyboard.close();
-
 	}
 }
