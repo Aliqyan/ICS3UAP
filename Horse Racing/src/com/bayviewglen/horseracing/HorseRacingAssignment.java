@@ -9,16 +9,23 @@ import java.util.Scanner;
 
 public class HorseRacingAssignment {
 	static Scanner keyboard = new Scanner(System.in);
+	static final int STARTING_WALLET = 100;
+	static final int FIRST_PART = 0;
+	static final int SECOND_PART = 1;
+	static final int ADJUST_TABLE_NUM = 1;
+
 
 	public static void main(String[] args) {
 		introMessage();
 		String[] horses = getHorses();
 		int[] ratings = getRatings();
-		
 		String[] playerNames = getPlayerNames();
-		int[] playerWallets = getPlayerWallets();
+		int[] playerWallets = getPlayerWallets(playerNames.length);
 		boolean gameOver = false;
+		int raceNumber = 1;
 		while (!gameOver) {
+			System.out.println("Are you ready?");
+			System.out.println("It is now time to commence race #" + raceNumber++);
 			doRace(horses, ratings, playerNames, playerWallets);
 			gameOver = promptForGameOver();
 		}
@@ -27,243 +34,291 @@ public class HorseRacingAssignment {
 		closingMessage();
 	}
 
-	private static void introMessage()  {
-		// TODO Auto-generated method stub
+	private static void introMessage() {
 		System.out.println("Welcome to Aliqyan's Magnificant Horse Racing Parlour");
-		System.out.println("Please note: only educated guesses are allowed as betting is HARAM, wink wink");
+		System.out.println("We wish you the best of luck and hope you have lots of fun!");
 	}
 
-	/*
-	 * Reads the horses from a file assume the file exists and is in the format
-	 * specified in the assignment.
-	 */
+	// reads all the names of the horses in the horses file
 	public static String[] getHorses() {
 		String[] horses = null;
 		try {
 			Scanner scanner = new Scanner(new File("input/horses.dat"));
 			int numHorses = Integer.parseInt(scanner.nextLine());
 			horses = new String[numHorses];
-	
+
 			for (int i = 0; i < numHorses; i++) {
-				horses[i] = scanner.nextLine().split(":")[0];
+				// Take only the name of the horse, not the rating
+				horses[i] = scanner.nextLine().split(":")[FIRST_PART];
 			}
-	
+			scanner.close();
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	
 		return horses;
 	}
 
+	// reads all the ratings of the horses in the horses file
 	public static int[] getRatings() {
 		int[] ratings = null;
 		try {
 			Scanner scanner = new Scanner(new File("input/horses.dat"));
 			int numHorses = Integer.parseInt(scanner.nextLine());
 			ratings = new int[numHorses];
-	
+
 			for (int i = 0; i < numHorses; i++) {
-				ratings[i] = Integer.parseInt(scanner.nextLine().split(":")[1]);
+				// Take only the ratings of the horses
+				ratings[i] = Integer.parseInt(scanner.nextLine().split(":")[SECOND_PART]);
 			}
-	
+			scanner.close();
+
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	
+
 		return ratings;
 	}
-	
+
+	// Gather all the players in the player file + those requested
 	private static String[] getPlayerNames() {
 		String[] playerNames = null;
-		ArrayList <String> additionalPlayerNames = new ArrayList<String>();
-		System.out.print("Would you like to 1.Add Player, 2.Start Betting: ");
-		while(getValidInput(1,2) == 1){
-			System.out.print("The name of the player is(we will only record the first name): " );
-			additionalPlayerNames.add(keyboard.nextLine().split(" ")[0]);
-			System.out.print("Would you like to 1.Add Player, 2.Start Betting: ");
 
-		}
+		// ask for additional players
+		ArrayList<String> additionalPlayerNames = getAdditionalPlayers();
 		System.out.println("No more players can be added to this race. Please wait until the next race.");
+
 		try {
 			Scanner scanner = new Scanner(new File("input/player.dat"));
 			int numPlayers = Integer.parseInt(scanner.nextLine());
 			playerNames = new String[numPlayers + additionalPlayerNames.size()];
-	
+
 			for (int i = 0; i < playerNames.length; i++) {
-				if(i < numPlayers){
-					playerNames[i] = (scanner.nextLine()).split(" ")[0];
-				}else{
-					playerNames[i] = additionalPlayerNames.get(i-numPlayers);
+				// add players in the file first, then add the additional
+				// players, if there are any
+				if (i < numPlayers) {
+					playerNames[i] = (scanner.nextLine()).split(" ")[FIRST_PART];
+				} else {
+					playerNames[i] = additionalPlayerNames.get(i - numPlayers);
 				}
 			}
-			
-	
+			scanner.close();
+
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-	
+
 		return playerNames;
 	}
 
-	private static int[] getPlayerWallets() {
+	// ask for any new players
+	private static ArrayList<String> getAdditionalPlayers() {
+		ArrayList<String> additionalPlayerNames = new ArrayList<String>();
+		System.out.println("***Please note that all new players begin with a standard $" + STARTING_WALLET + "***");
+		System.out.print("Would you like to 1.Add Player, 2.Start Betting: ");
+		final int ADD_PLAYER = 1;
+		while (getValidInput(1, 2) == ADD_PLAYER) {
+			System.out.print("The name of the player is(we will only record the first name): ");
+			additionalPlayerNames.add(keyboard.nextLine().split(" ")[FIRST_PART]);
+			System.out.print("Would you like to 1.Add Player, 2.Start Betting: ");
+		}
+		return additionalPlayerNames;
+	}
+
+	// Gather amount players have + add a standard amount to new players
+	private static int[] getPlayerWallets(int numPlayers) {
 		int[] playerWallets = null;
 		try {
 			Scanner scanner = new Scanner(new File("input/player.dat"));
-			int numPlayers = Integer.parseInt(scanner.nextLine());
+			int numPreviousPlayers = Integer.parseInt(scanner.nextLine());
 			playerWallets = new int[numPlayers];
-	
 			for (int i = 0; i < numPlayers; i++) {
-				if(i < numPlayers)
-					playerWallets[i] = Integer.parseInt((scanner.nextLine()).split(" ")[1]);
+				// add amount previously owned unless it is a new player
+				if (i < numPreviousPlayers)
+					playerWallets[i] = Integer.parseInt((scanner.nextLine()).split(" ")[SECOND_PART]);
 				else
-					playerWallets[i] = 100;
+					playerWallets[i] = STARTING_WALLET;
 			}
-	
+			scanner.close();
+
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	
+
 		return playerWallets;
 	}
 
 	private static void doRace(String[] horses, int[] ratings, String[] playerNames, int[] playerWallets) {
-		// TODO Auto-generated method stub
-		// horsesInRace contains the index of the horses from the master horse
-		// array
+		// horsesInRace contains the index of the horses from the horse array
 		int[] horsesInRace = getHorsesInRace(horses);
+
 		// 2d array with column 0 = bet amount, column 1 = horseIndex(from
 		// horsesInRace)
-		
 		int[][] playerBets = getPlayerBets(playerNames, playerWallets, horsesInRace, horses, ratings);
-		for(int i = 0; i< playerBets.length; i++){
-			System.out.println(playerBets[i][0] + "\t" + playerBets[i][1]);
-	    }
-		//
-		ArrayList winningHorse = startRace(horsesInRace, horses, ratings);
-	
+
+		// an Array List because number of horses passing finish at the same time is unknown
+		ArrayList<Integer> winningHorse = startRace(horsesInRace, horses, ratings);
+
 		payOutBets(playerBets, playerWallets, playerNames, winningHorse, ratings);
 	}
 
+	// Randomly pick 5-8 horses to be in the race from horses array
 	private static int[] getHorsesInRace(String[] horses) {
-		// TODO Auto-generated method stub
-		int numRaceHorses = (int) (Math.random() * 4 + 5);
+		final int MIN_NUM_HORSES = 5;
+		final int RANGE_NUM_HORSES = 4;
+		//pick random number of horses
+		int numRaceHorses = (int) (Math.random() * RANGE_NUM_HORSES + MIN_NUM_HORSES);
+		// store the index of the horse in the horse array
 		int[] horsesInRace = new int[numRaceHorses];
 		for (int i = 0; i < numRaceHorses; i++) {
 			int randomIndex = (int) (Math.random() * horses.length);
+			//check if horse is already in race, if yes choose a new horse
 			while (alreadyInRace(randomIndex, horsesInRace)) {
 				randomIndex = (int) (Math.random() * horses.length);
 			}
 			horsesInRace[i] = randomIndex;
-	
 		}
 		return horsesInRace;
 	}
 
-	private static int[][] getPlayerBets(String[] playerNames, int[] playerWallets, int[] horsesInRace, String[] horses, int[] ratings) {
-		// TODO Auto-generated method stub
-		int[][] playerBets = new int [playerNames.length][2];
+	// Check if horse is already in race: Credits to Mr. Deslauriers for the method
+	// if method returns true than a new horse must be picked as it's in the race
+	public static boolean alreadyInRace(int horse, int[] horsesInRace) {
+
+		for (int i = 0; i < horsesInRace.length; i++) {
+			if (horsesInRace[i] == horse) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	private static int[][] getPlayerBets(String[] playerNames, int[] playerWallets, int[] horsesInRace, String[] horses,
+			int[] ratings) {
+		int[][] playerBets = new int[playerNames.length][2];
+		
+		//specifically for the playerBets array
+		final int BET_AMOUNT = 0; 
+		final int HORSE_BETTED = 1;
+		
+		final int MIN_BET = 1;
 		displayPlayers(playerNames, playerWallets);
 		boolean keepBetting = true;
-		while(keepBetting){
+		while (keepBetting) {
 			System.out.print("Choose Player: ");
-			int playerChoice = getValidInput(1, playerNames.length) - 1;
-			while(playerBets[playerChoice][0] != 0){
-				System.out.print("You cannot bet more than once in a race, please choose another player: ");
-				 playerChoice = getValidInput(1, playerNames.length) - 1;
+			//make sure the player exists
+			int playerChoice = 0; 
+			boolean validChoice = false;
+			//check if the player is able to bet: he hasn't made a bet before and he isn't broke
+			while(!validChoice){
+				playerChoice = getValidInput(1, playerNames.length) - ADJUST_TABLE_NUM;
+				if(playerBets[playerChoice][BET_AMOUNT] != 0) {
+					System.out.print(playerNames[playerChoice] + ", you cannot bet more than once in a race, please choose another player: ");
+				} 
+				else if(playerWallets[playerChoice] == 0){
+					System.out.println("Sorry " + playerNames[playerChoice] + ", you cannot bet because you are broke.");
+					System.out.println("Please choose another player: ");
+				}else{
+					validChoice = true;
+				}			
+
 			}
+			// find out how much player wants to bet, and validate the bet			
 			System.out.println("Hello " + playerNames[playerChoice]);
 			System.out.print("How much would you like to bet, you have $" + playerWallets[playerChoice] + "? ");
-			playerBets[playerChoice][0] = getValidInput(0,  playerWallets[playerChoice]);
+			playerBets[playerChoice][BET_AMOUNT] = getValidInput(MIN_BET, playerWallets[playerChoice]);
 			System.out.print("Which horse would you like to bet on?(enter 0 if you want to see the list of horses) ");
-			int choice = getValidInput(0,  horsesInRace.length);
-			if(choice == 0){
+			int choice = getValidInput(0, horsesInRace.length);
+			if (choice == 0) {
 				diplayHorses(horsesInRace, horses, ratings);
 				System.out.print("Which horse would you like to bet on? ");
-				choice = getValidInput(1,  horsesInRace.length);
+				choice = getValidInput(1, horsesInRace.length);
 			}
-			playerBets[playerChoice][1] = choice;
-			System.out.println("Option(1.Bet, 2. Start Race):" );
-			if(getValidInput(1,2) == 2) keepBetting = false;
+			playerBets[playerChoice][HORSE_BETTED] = choice;
+			System.out.print("Option(1.Bet, 2. Start Race): ");
+			if (getValidInput(1, 2) == 2)
+				keepBetting = false;
 		}
 		return playerBets;
 
 	}
 
+	
+
 	private static void displayPlayers(String[] playerNames, int[] playerWallets) {
 		System.out.println("");
 		System.out.printf("%s" + "|" + "%-20s" + "|" + "%-10s|\n", "#", "Player Name", "Wallet");
 		System.out.println("-|--------------------|----------|");
-		for(int j =0; j<playerNames.length; j++){
-			
-			System.out.printf("%d" + "|" + "%-20s|%10.2f" + "|\n", j+1, playerNames[j], (double)playerWallets[j]);
+		for (int j = 0; j < playerNames.length; j++) {
+			System.out.printf("%d" + "|" + "%-20s|%10.2f" + "|\n", j + ADJUST_TABLE_NUM, playerNames[j], (double) playerWallets[j]);
 			System.out.println("-|--------------------|----------|");
 		}
 	}
 
 	private static void diplayHorses(int[] horsesInRace, String[] horses, int[] ratings) {
-		// TODO Auto-generated method stub
 		System.out.printf("%s" + "|" + "%-20s" + "-%10s" + "|\n", "#", "Horse Name", "Ratings");
 		System.out.println("-|--------------------|----------|");
-		for(int j =0; j<horsesInRace.length; j++){
+		for (int j = 0; j < horsesInRace.length; j++) {
 			String ratingStars = "";
-			for(int i = 0; i < ratings[horsesInRace[j]] ;i++){
+			for (int i = 0; i < ratings[horsesInRace[j]]; i++) {
 				ratingStars += "*";
 			}
-			System.out.printf("%d" + "|" + "%-20s" + "|" + "%-10s" + "|\n", j+1, horses[horsesInRace[j]], ratingStars);
+			System.out.printf("%d" + "|" + "%-20s" + "|" + "%-10s" + "|\n", j + ADJUST_TABLE_NUM, horses[horsesInRace[j]],
+					ratingStars);
 			System.out.println("-|--------------------|----------|");
-			
+
 		}
 	}
 
-	public static int getValidInput(int min, int max){
+	public static int getValidInput(int min, int max) {
 		boolean isValid = false;
 		int x = 0;
-		while(!isValid){
-			try{
+		while (!isValid) {
+			try {
 				x = Integer.parseInt(keyboard.nextLine());
-				if (x>=min && x<=max) 
+				if (x >= min && x <= max)
 					isValid = true;
-				else System.out.print("Please enter a number between " + min + " and " + max + ": ");
-			}catch(Exception ex){
+				else
+					System.out.print("Please enter a number between " + min + " and " + max + ": ");
+			} catch (Exception ex) {
 				System.out.print("Please enter a number between " + min + " and " + max + ": ");
 			}
 		}
-		
+
 		return x;
 	}
 
 	private static ArrayList<Integer> startRace(int[] horsesInRace, String[] horses, int[] ratings) {
-		// TODO Auto-generated method stub
 		boolean raceOver = false;
+		final int ARRAY_ELEMENT_ADJUSTER = 1;
 		int[] spaces = new int[horsesInRace.length];
-		double[] maxSpaces = {4,4.5,5,5.5,6};
-		ArrayList <Integer> winningHorse = new ArrayList<>();
-		for(int i = 0; i<horsesInRace.length; i++){
+		double[] maxSpaces = { 4, 4.5, 5, 5.5, 6 };
+		ArrayList<Integer> winningHorse = new ArrayList<>();
+		//must initialize with one so that there is enough space of the horse number
+		for (int i = 0; i < horsesInRace.length; i++) {
 			spaces[i] = 1;
 		}
-		while(!raceOver){
+		while (!raceOver) {
 			System.out.println();
 			System.out.println();
 			System.out.println();
-			System.out.println("--------------------|--------------------------------------------------------------------------------");
-			for(int i = 0; i<horsesInRace.length;i++){
-				if(spaces[i] >= 80){
+			System.out.println(
+					"--------------------|--------------------------------------------------------------------------------");
+			for (int i = 0; i < horsesInRace.length; i++) {
+				if (spaces[i] >= 80) {
 					winningHorse.add(horsesInRace[i]);
 					raceOver = true;
 				}
-				
-				String format = "%" + spaces[i] + "d";
-				System.out.printf("%20s" + "|" + format + "\n", horses[horsesInRace[i]], i+1);
-				System.out.println("--------------------|--------------------------------------------------------------------------------");
-				
 
-				spaces[i] += (int)(Math.random() * maxSpaces[ratings[horsesInRace[i]]-1]);
-				//System.out.print(spaces[i] + ", " );
+				String format = "%" + spaces[i] + "d";
+				System.out.printf("%20s" + "|" + format + "\n", horses[horsesInRace[i]], i + ADJUST_TABLE_NUM);
+				System.out.println(
+						"--------------------|--------------------------------------------------------------------------------");
+
+				spaces[i] += (int) (Math.random() * maxSpaces[ratings[horsesInRace[i]] - ARRAY_ELEMENT_ADJUSTER]);
+				// System.out.print(spaces[i] + ", " );
 			}
 			System.out.println();
 			try {
@@ -271,401 +326,80 @@ public class HorseRacingAssignment {
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-	
+
 		}
-		for(int i = 0; i<winningHorse.size(); i++){
-			System.out.println(horses[winningHorse.get(i)]);
+		System.out.print("The following horses have won: ");
+		for (int i = 0; i < winningHorse.size(); i++) {
+			System.out.println("\t" + horses[winningHorse.get(i)]);
 		}
 		return winningHorse;
+	}
+
+	private static void payOutBets(int[][] playerBets, int[] playerWallets, String[] playerNames,
+			ArrayList<Integer> winningHorse, int[] ratings) {
+		// TODO Auto-generated method stub
+		double[] ratingsMultiplier = { 2, 1.25, 1, 0.75, 0.5 };
+		for (int i = 0; i < playerNames.length; i++) {
+			if (playerBets[i][1] != -1) {
+				boolean hasWon = false;
+				for (int j = 0; j < winningHorse.size(); j++) {
+					if (playerBets[i][1] == (int) winningHorse.get(j)) {
+						playerWallets[i] += playerBets[i][0] * ratingsMultiplier[ratings[(int) winningHorse.get(j)]];
+						hasWon = true;
+						break;
+					}
+				}
+				if (!hasWon) {
+					playerWallets[i] -= playerBets[i][0];
+				}
+			}
+		}
+	}
+
+	private static boolean promptForGameOver() {
+		System.out.print("Would you like to end the game, please enter either yes or no: ");
+		String response = keyboard.nextLine();
+		return checkYesNo(keyboard, response);
+
+	}
+
+	private static boolean checkYesNo(Scanner keyboard, String message) {
+		// TODO Auto-generated method stub
+		while (!(message.toLowerCase().equals("yes") || message.toLowerCase().equals("no"))) {
+			System.out.print("Please enter either yes or no:");
+			message = keyboard.nextLine();
+		}
+		return message.toLowerCase().equals("yes");
 	}
 
 	private static void updatePlayerData(String[] playerNames, int[] playerWallets) {
 		FileWriter fw;
 		try {
 			fw = new FileWriter(new File("input/player.dat"));
-			fw.write(playerNames.length + "\n");
+			int numCurrPlayers = playerNames.length;
+			for (int i = 0; i < playerNames.length; i++) {
+				if (playerWallets[i] == 0) {
+					System.out.println("Sorry " + playerNames[i]
+							+ ", you are broke, we are terminating your membership, please sign up next time and you will start with $"
+							+ STARTING_WALLET + ".");
+					numCurrPlayers--;
+				}
+			}
+			fw.write(numCurrPlayers + "\n");
 
-			for(int i = 0; i < playerNames.length; i++){
-				fw.write(playerNames[i] + " " + playerWallets[i] + "\n");
+			for (int i = 0; i < playerNames.length; i++) {
+				if (playerWallets[i] != 0)
+					fw.write(playerNames[i] + " " + playerWallets[i] + "\n");
 			}
 			fw.close();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
-	}
-
-	private static boolean promptForGameOver() {
-		System.out.print("Would you like to end the game, enter either yes or no: ");
-		String response = keyboard.nextLine();
-		return checkYesNo(keyboard, response);
-
-	}
-
-	private static boolean checkYesNo(Scanner keyboard, String message) {
-		// TODO Auto-generated method stub
-		while (!(message.toLowerCase().equals("yes") || message.toLowerCase().equals("no"))) {
-			System.out.print("Please enter either yes or no:");
-			message = keyboard.nextLine();
-		}
-		return message.toLowerCase().equals("yes");
-	}
-
-	private static void payOutBets(int[][] playerBets, int[] playerWallets, String[] playerNames, ArrayList winningHorse, int[] ratings) {
-		// TODO Auto-generated method stub
-		double[] ratingsMultiplier = {2,1.25,1, 0.75, 0.5};
-		for(int i = 0; i<playerNames.length; i++){
-			if(playerBets[i][1] != -1){
-				boolean hasWon = false;
-				for(int j = 0; j < winningHorse.size(); j++){
-					if(playerBets[i][1] == (int) winningHorse.get(j)){
-						playerWallets[i] += playerBets[i][0] * ratingsMultiplier[ratings[(int) winningHorse.get(j)]];
-						hasWon = true;
-						break;
-					}
-				}
-				if(!hasWon){
-					playerWallets[i] -= playerBets[i][0];
-				}
-			}
-		}
 	}
 
 	private static void closingMessage() {
-		// TODO Auto-generated method stub
-	
-	}
-
-	/*
-	 * Check if a horse is already in the race - uses a modified search method
-	 */
-	public static boolean alreadyInRace(int horse, int[] horsesInRace) {
-
-		for (int i = 0; i < horsesInRace.length; i++) {
-			if (horsesInRace[i] == horse) {
-				return true;
-			}
-		}
-
-		return false;
+		System.out.println("Thank you for playing at Aliqyan's Magnifient Horse Racing Parlour!");
+		System.out.println("We hope to see you soon!");
 	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*package com.bayviewglen.horseracing;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.InputMismatchException;
-import java.util.Scanner;
-
-public class HorseRacingAssignment {
-	static Scanner keyboard = new Scanner(System.in);
-
-	public static void main(String[] args) {
-		introMessage();
-		String[] horses = getHorses();
-		ArrayList<String> playerNames = getPlayerNames();
-		int[] playerWallets = getPlayerWallets();
-		for (int i = 0; i < playerNames.size(); i++) {
-			System.out.println(playerNames.get(i) + "\t\t" + playerWallets[i]);
-		}
-		boolean gameOver = false;
-		while (!gameOver) {
-			doRace(horses, playerNames, playerWallets);
-			gameOver = promptForGameOver();
-		}
-
-		updatePlayerData(playerNames, playerWallets);
-		closingMessage();
-	}
-
-	private static void introMessage() {
-		// TODO Auto-generated method stub
-		System.out.println("Welcome to Aliqyan's Magnificant Horse Racing Parlour");
-		System.out.println("Please note: only educated guesses are allowed as betting is HARAM, wink wink");
-	}
-
-	
-	public static String[] getHorses() {
-		String[] horses = null;
-		try {
-			Scanner scanner = new Scanner(new File("input/horses.dat"));
-			int numHorses = Integer.parseInt(scanner.nextLine());
-			horses = new String[numHorses];
-	
-			for (int i = 0; i < numHorses; i++) {
-				horses[i] = scanner.nextLine();
-			}
-	
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	
-		return horses;
-	}
-
-	private static ArrayList<String> getPlayerNames() {
-		ArrayList<String>playerNames = new ArrayList<String>();
-		try {
-			Scanner scanner = new Scanner(new File("input/player.dat"));
-			int numPlayers = Integer.parseInt(scanner.nextLine());	
-	
-			for (int i = 0; i < numPlayers; i++) {
-				playerNames.add((scanner.nextLine()).split(" ")[0]);
-			}
-	
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	
-		return playerNames;
-	}
-
-	private static int[] getPlayerWallets() {
-		int[] playerWallets = null;
-		try {
-			Scanner scanner = new Scanner(new File("input/player.dat"));
-			int numPlayers = Integer.parseInt(scanner.nextLine());
-			playerWallets = new int[numPlayers];
-	
-			for (int i = 0; i < numPlayers; i++) {
-				playerWallets[i] = Integer.parseInt((scanner.nextLine()).split(" ")[1]);
-			}
-	
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	
-		return playerWallets;
-	}
-
-	private static void doRace(String[] horses, ArrayList<String> playerNames, int[] playerWallets) {
-		// TODO Auto-generated method stub
-		// horsesInRace contains the index of the horses from the master horse
-		// array
-		int[] horsesInRace = getHorsesInRace(horses);
-		// 2d array with column 0 = bet amount, column 1 = horseIndex(from
-		// horsesInRace)
-		
-		int[][] playerBets = getPlayerBets(playerNames, playerWallets, horsesInRace, horses);
-		for(int i = 0; i< playerBets.length; i++){
-			System.out.println(playerBets[i][0] + "\t" + playerBets[i][1]);
-	    }
-	
-		int winningHorse = startRace(horsesInRace, horses);
-	
-		payOutBets(playerBets, playerWallets, playerNames, winningHorse);
-	}
-
-	private static int[] getHorsesInRace(String[] horses) {
-		// TODO Auto-generated method stub
-		int numRaceHorses = (int) (Math.random() * 4 + 5);
-		int[] horsesInRace = new int[numRaceHorses];
-		for (int i = 0; i < numRaceHorses; i++) {
-			int randomIndex = (int) (Math.random() * horses.length);
-			while (alreadyInRace(randomIndex, horsesInRace)) {
-				randomIndex = (int) (Math.random() * horses.length);
-			}
-			horsesInRace[i] = randomIndex;
-	
-		}
-		return horsesInRace;
-	}
-
-	private static int[][] getPlayerBets(ArrayList<String> playerNames, int[] playerWallets, int[] horsesInRace, String[] horses) {
-		// TODO Auto-generated method stub
-		// insert chart with player names and wallet amount
-		// insert chart with all of the horses
-		int[][] playerBets = new int [playerNames.size()][2];
-		displayPlayers(playerNames, playerWallets);
-		boolean keepBetting = true;
-		while(keepBetting){
-			System.out.print("Choose Player: ");
-			int playerChoice = getValidInput(1, playerNames.size()) - 1;
-			while(playerBets[playerChoice][0] != 0){
-				System.out.print("You cannot bet more than once in a race, please choose another player: ");
-				 playerChoice = getValidInput(1, playerNames.size()) - 1;
-			}
-			System.out.println("Hello " + playerNames.get(playerChoice));
-			System.out.print("How much would you like to bet, you have $" + playerWallets[playerChoice] + "? ");
-			playerBets[playerChoice][0] = getValidInput(0,  playerWallets[playerChoice]);
-			System.out.print("Which horse would you like to bet on?(enter 0 if you want to see the list of horses) ");
-			int choice = getValidInput(0,  horsesInRace.length);
-			if(choice == 0){
-				diplayHorses(horsesInRace, horses);
-				System.out.print("Which horse would you like to bet on? ");
-				choice = getValidInput(1,  horsesInRace.length);
-			}
-			playerBets[playerChoice][1] = choice;
-			System.out.println("Option(1.Bet, 2. Start Race):" );
-			if(getValidInput(1,2) == 2) keepBetting = false;
-		}
-		return playerBets;
-
-	}
-
-	private static void displayPlayers(ArrayList<String> playerNames, int[] playerWallets) {
-		System.out.println("");
-		System.out.printf("%s" + "|" + "%-20s" + "|" + "%-10s|\n", "#", "Player Name", "Wallet");
-		System.out.println("-|--------------------|----------|");
-		for(int j =0; j<playerNames.size(); j++){
-			System.out.printf("%d" + "|" + "%-20s|%10.2f" + "|\n", j+1, playerNames.get(j), (double)playerWallets[j]);
-			System.out.println("-|--------------------|----------|");
-		}
-	}
-
-	private static void diplayHorses(int[] horsesInRace, String[] horses) {
-		// TODO Auto-generated method stub
-		System.out.printf("%s" + "|" + "%-20s" + "|\n", "#", "Horse Name");
-		System.out.println("-|--------------------|");
-		for(int j =0; j<horsesInRace.length; j++){
-			System.out.printf("%d" + "|" + "%-20s" + "|\n", j+1, horses[horsesInRace[j]]);
-			System.out.println("-|--------------------|");
-			
-		}
-	}
-
-	public static int getValidInput(int min, int max){
-		boolean isValid = false;
-		int x = 0;
-		while(!isValid){
-			try{
-				x = Integer.parseInt(keyboard.nextLine());
-				if (x>=min && x<=max) 
-					isValid = true;
-				else System.out.print("Please enter a number between " + min + " and " + max + ": ");
-			}catch(Exception ex){
-				System.out.print("Please enter a number between " + min + " and " + max + ": ");
-			}
-		}
-		
-		return x;
-	}
-
-	private static int startRace(int[] horsesInRace, String[] horses) {
-		// TODO Auto-generated method stub
-		boolean raceOver = false;
-		int[] spaces = new int[horsesInRace.length];
-		int winningHorse = -1;
-		for(int i = 0; i<horsesInRace.length; i++){
-			spaces[i] = 1;
-		}
-		while(!raceOver){
-			System.out.println();
-			System.out.println();
-			System.out.println();
-			System.out.println("--------------------|--------------------------------------------------------------------------------");
-			for(int i = 0; i<horsesInRace.length;i++){
-				if(spaces[i] >= 80){
-					//winning horse only returns one horse passing the finish line
-					winningHorse = horsesInRace[i];
-					raceOver = true;
-				}
-				String format = "%" + spaces[i] + "d";
-				System.out.printf("%20s" + "|" + format + "\n", horses[horsesInRace[i]], i+1);
-				System.out.println("--------------------|--------------------------------------------------------------------------------");
-				spaces[i] += (int)(Math.random()*5);
-			}
-			try {
-				Thread.sleep(100);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-	
-		}
-		System.out.println(horses[winningHorse]);
-		return winningHorse;
-		
-	}
-
-	private static void updatePlayerData(ArrayList<String> playerNames, int[] playerWallets) {
-		FileWriter fw;
-		try {
-			fw = new FileWriter(new File("input/player.dat"));
-			fw.write(playerNames.size() + "\n");
-
-			for(int i = 0; i < playerNames.size(); i++){
-				fw.write(playerNames.get(i) + " " + playerWallets[i] + "\n");
-			}
-			fw.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-	}
-
-	private static boolean promptForGameOver() {
-		System.out.print("Would you like to end the game, enter either yes or no: ");
-		String response = keyboard.nextLine();
-		return checkYesNo(keyboard, response);
-
-	}
-
-	private static boolean checkYesNo(Scanner keyboard, String message) {
-		// TODO Auto-generated method stub
-		while (!(message.toLowerCase().equals("yes") || message.toLowerCase().equals("no"))) {
-			System.out.print("Please enter either yes or no:");
-			message = keyboard.nextLine();
-		}
-		return message.toLowerCase().equals("yes");
-	}
-
-	private static void payOutBets(int[][] playerBets, int[] playerWallets, ArrayList<String> playerNames, int winningHorse) {
-		// TODO Auto-generated method stub
-		for(int i = 0; i<playerNames.size(); i++){
-			if(playerBets[i][1] != -1){
-				if(playerBets[i][1] == winningHorse){
-					playerWallets[i] += playerBets[i][0];
-				}else{
-					playerWallets[i] -= playerBets[i][0];
-				}
-			}
-		}
-	}
-
-	private static void closingMessage() {
-		// TODO Auto-generated method stub
-	
-	}
-
-	
-	// Check if a horse is already in the race - uses a modified search method
-	 
-	public static boolean alreadyInRace(int horse, int[] horsesInRace) {
-
-		for (int i = 0; i < horsesInRace.length; i++) {
-			if (horsesInRace[i] == horse) {
-				return true;
-			}
-		}
-
-		return false;
-	}
-}
-*/
