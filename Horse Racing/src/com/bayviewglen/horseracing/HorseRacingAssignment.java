@@ -13,11 +13,13 @@ public class HorseRacingAssignment {
 	public static void main(String[] args) {
 		introMessage();
 		String[] horses = getHorses();
+		int[] ratings = getRatings();
+		
 		String[] playerNames = getPlayerNames();
-		int[] playerWallets = getPlayerWallets(playerNames.length);
+		int[] playerWallets = getPlayerWallets();
 		boolean gameOver = false;
 		while (!gameOver) {
-			doRace(horses, playerNames, playerWallets);
+			doRace(horses, ratings, playerNames, playerWallets);
 			gameOver = promptForGameOver();
 		}
 
@@ -43,7 +45,7 @@ public class HorseRacingAssignment {
 			horses = new String[numHorses];
 	
 			for (int i = 0; i < numHorses; i++) {
-				horses[i] = scanner.nextLine();
+				horses[i] = scanner.nextLine().split(":")[0];
 			}
 	
 		} catch (FileNotFoundException e) {
@@ -54,6 +56,25 @@ public class HorseRacingAssignment {
 		return horses;
 	}
 
+	public static int[] getRatings() {
+		int[] ratings = null;
+		try {
+			Scanner scanner = new Scanner(new File("input/horses.dat"));
+			int numHorses = Integer.parseInt(scanner.nextLine());
+			ratings = new int[numHorses];
+	
+			for (int i = 0; i < numHorses; i++) {
+				ratings[i] = Integer.parseInt(scanner.nextLine().split(":")[1]);
+			}
+	
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	
+		return ratings;
+	}
+	
 	private static String[] getPlayerNames() {
 		String[] playerNames = null;
 		ArrayList <String> additionalPlayerNames = new ArrayList<String>();
@@ -88,14 +109,14 @@ public class HorseRacingAssignment {
 		return playerNames;
 	}
 
-	private static int[] getPlayerWallets(int length) {
+	private static int[] getPlayerWallets() {
 		int[] playerWallets = null;
 		try {
 			Scanner scanner = new Scanner(new File("input/player.dat"));
 			int numPlayers = Integer.parseInt(scanner.nextLine());
-			playerWallets = new int[length];
+			playerWallets = new int[numPlayers];
 	
-			for (int i = 0; i < length; i++) {
+			for (int i = 0; i < numPlayers; i++) {
 				if(i < numPlayers)
 					playerWallets[i] = Integer.parseInt((scanner.nextLine()).split(" ")[1]);
 				else
@@ -110,7 +131,7 @@ public class HorseRacingAssignment {
 		return playerWallets;
 	}
 
-	private static void doRace(String[] horses, String[] playerNames, int[] playerWallets) {
+	private static void doRace(String[] horses, int[] ratings, String[] playerNames, int[] playerWallets) {
 		// TODO Auto-generated method stub
 		// horsesInRace contains the index of the horses from the master horse
 		// array
@@ -118,14 +139,14 @@ public class HorseRacingAssignment {
 		// 2d array with column 0 = bet amount, column 1 = horseIndex(from
 		// horsesInRace)
 		
-		int[][] playerBets = getPlayerBets(playerNames, playerWallets, horsesInRace, horses);
+		int[][] playerBets = getPlayerBets(playerNames, playerWallets, horsesInRace, horses, ratings);
 		for(int i = 0; i< playerBets.length; i++){
 			System.out.println(playerBets[i][0] + "\t" + playerBets[i][1]);
 	    }
+		//
+		ArrayList winningHorse = startRace(horsesInRace, horses, ratings);
 	
-		int winningHorse = startRace(horsesInRace, horses);
-	
-		payOutBets(playerBets, playerWallets, playerNames, winningHorse);
+		payOutBets(playerBets, playerWallets, playerNames, winningHorse, ratings);
 	}
 
 	private static int[] getHorsesInRace(String[] horses) {
@@ -143,7 +164,7 @@ public class HorseRacingAssignment {
 		return horsesInRace;
 	}
 
-	private static int[][] getPlayerBets(String[] playerNames, int[] playerWallets, int[] horsesInRace, String[] horses) {
+	private static int[][] getPlayerBets(String[] playerNames, int[] playerWallets, int[] horsesInRace, String[] horses, int[] ratings) {
 		// TODO Auto-generated method stub
 		int[][] playerBets = new int [playerNames.length][2];
 		displayPlayers(playerNames, playerWallets);
@@ -161,7 +182,7 @@ public class HorseRacingAssignment {
 			System.out.print("Which horse would you like to bet on?(enter 0 if you want to see the list of horses) ");
 			int choice = getValidInput(0,  horsesInRace.length);
 			if(choice == 0){
-				diplayHorses(horsesInRace, horses);
+				diplayHorses(horsesInRace, horses, ratings);
 				System.out.print("Which horse would you like to bet on? ");
 				choice = getValidInput(1,  horsesInRace.length);
 			}
@@ -178,18 +199,23 @@ public class HorseRacingAssignment {
 		System.out.printf("%s" + "|" + "%-20s" + "|" + "%-10s|\n", "#", "Player Name", "Wallet");
 		System.out.println("-|--------------------|----------|");
 		for(int j =0; j<playerNames.length; j++){
+			
 			System.out.printf("%d" + "|" + "%-20s|%10.2f" + "|\n", j+1, playerNames[j], (double)playerWallets[j]);
 			System.out.println("-|--------------------|----------|");
 		}
 	}
 
-	private static void diplayHorses(int[] horsesInRace, String[] horses) {
+	private static void diplayHorses(int[] horsesInRace, String[] horses, int[] ratings) {
 		// TODO Auto-generated method stub
-		System.out.printf("%s" + "|" + "%-20s" + "|\n", "#", "Horse Name");
-		System.out.println("-|--------------------|");
+		System.out.printf("%s" + "|" + "%-20s" + "-%10s" + "|\n", "#", "Horse Name", "Ratings");
+		System.out.println("-|--------------------|----------|");
 		for(int j =0; j<horsesInRace.length; j++){
-			System.out.printf("%d" + "|" + "%-20s" + "|\n", j+1, horses[horsesInRace[j]]);
-			System.out.println("-|--------------------|");
+			String ratingStars = "";
+			for(int i = 0; i < ratings[horsesInRace[j]] ;i++){
+				ratingStars += "*";
+			}
+			System.out.printf("%d" + "|" + "%-20s" + "|" + "%-10s" + "|\n", j+1, horses[horsesInRace[j]], ratingStars);
+			System.out.println("-|--------------------|----------|");
 			
 		}
 	}
@@ -211,11 +237,12 @@ public class HorseRacingAssignment {
 		return x;
 	}
 
-	private static int startRace(int[] horsesInRace, String[] horses) {
+	private static ArrayList<Integer> startRace(int[] horsesInRace, String[] horses, int[] ratings) {
 		// TODO Auto-generated method stub
 		boolean raceOver = false;
 		int[] spaces = new int[horsesInRace.length];
-		int winningHorse = -1;
+		double[] maxSpaces = {4,4.5,5,5.5,6};
+		ArrayList <Integer> winningHorse = new ArrayList<>();
 		for(int i = 0; i<horsesInRace.length; i++){
 			spaces[i] = 1;
 		}
@@ -226,15 +253,19 @@ public class HorseRacingAssignment {
 			System.out.println("--------------------|--------------------------------------------------------------------------------");
 			for(int i = 0; i<horsesInRace.length;i++){
 				if(spaces[i] >= 80){
-					//winning horse only returns one horse passing the finish line
-					winningHorse = horsesInRace[i];
+					winningHorse.add(horsesInRace[i]);
 					raceOver = true;
 				}
+				
 				String format = "%" + spaces[i] + "d";
 				System.out.printf("%20s" + "|" + format + "\n", horses[horsesInRace[i]], i+1);
 				System.out.println("--------------------|--------------------------------------------------------------------------------");
-				spaces[i] += (int)(Math.random()*5);
+				
+
+				spaces[i] += (int)(Math.random() * maxSpaces[ratings[horsesInRace[i]]-1]);
+				//System.out.print(spaces[i] + ", " );
 			}
+			System.out.println();
 			try {
 				Thread.sleep(100);
 			} catch (InterruptedException e) {
@@ -242,9 +273,10 @@ public class HorseRacingAssignment {
 			}
 	
 		}
-		System.out.println(horses[winningHorse]);
+		for(int i = 0; i<winningHorse.size(); i++){
+			System.out.println(horses[winningHorse.get(i)]);
+		}
 		return winningHorse;
-		
 	}
 
 	private static void updatePlayerData(String[] playerNames, int[] playerWallets) {
@@ -280,13 +312,20 @@ public class HorseRacingAssignment {
 		return message.toLowerCase().equals("yes");
 	}
 
-	private static void payOutBets(int[][] playerBets, int[] playerWallets, String[] playerNames, int winningHorse) {
+	private static void payOutBets(int[][] playerBets, int[] playerWallets, String[] playerNames, ArrayList winningHorse, int[] ratings) {
 		// TODO Auto-generated method stub
+		double[] ratingsMultiplier = {2,1.25,1, 0.75, 0.5};
 		for(int i = 0; i<playerNames.length; i++){
 			if(playerBets[i][1] != -1){
-				if(playerBets[i][1] == winningHorse){
-					playerWallets[i] += playerBets[i][0];
-				}else{
+				boolean hasWon = false;
+				for(int j = 0; j < winningHorse.size(); j++){
+					if(playerBets[i][1] == (int) winningHorse.get(j)){
+						playerWallets[i] += playerBets[i][0] * ratingsMultiplier[ratings[(int) winningHorse.get(j)]];
+						hasWon = true;
+						break;
+					}
+				}
+				if(!hasWon){
 					playerWallets[i] -= playerBets[i][0];
 				}
 			}
