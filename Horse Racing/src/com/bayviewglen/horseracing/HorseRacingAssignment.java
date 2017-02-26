@@ -13,7 +13,7 @@ public class HorseRacingAssignment {
 	static final int FIRST_PART = 0;
 	static final int SECOND_PART = 1;
 	static final int ADJUST_TABLE_NUM = 1;
-
+	static boolean playerAllLost = false;
 
 	public static void main(String[] args) {
 		introMessage();
@@ -27,11 +27,14 @@ public class HorseRacingAssignment {
 			System.out.println("Are you ready?");
 			System.out.println("It is now time to commence race #" + raceNumber++);
 			doRace(horses, ratings, playerNames, playerWallets);
-			gameOver = promptForGameOver();
+			if(!playerAllLost) 
+				gameOver = promptForGameOver();
+			else
+				gameOver = false;
 		}
-
 		updatePlayerData(playerNames, playerWallets);
 		closingMessage();
+		
 	}
 
 	private static void introMessage() {
@@ -84,13 +87,13 @@ public class HorseRacingAssignment {
 	private static String[] getPlayerNames() {
 		String[] playerNames = null;
 
-		// ask for additional players
-		ArrayList<String> additionalPlayerNames = getAdditionalPlayers();
-		System.out.println("No more players can be added to this race. Please wait until the next race.");
-
 		try {
 			Scanner scanner = new Scanner(new File("input/player.dat"));
 			int numPlayers = Integer.parseInt(scanner.nextLine());
+
+			// ask for additional players
+			ArrayList<String> additionalPlayerNames = getAdditionalPlayers(numPlayers);
+
 			playerNames = new String[numPlayers + additionalPlayerNames.size()];
 
 			for (int i = 0; i < playerNames.length; i++) {
@@ -113,16 +116,24 @@ public class HorseRacingAssignment {
 	}
 
 	// ask for any new players
-	private static ArrayList<String> getAdditionalPlayers() {
+	private static ArrayList<String> getAdditionalPlayers(int numPlayers) {
 		ArrayList<String> additionalPlayerNames = new ArrayList<String>();
 		System.out.println("***Please note that all new players begin with a standard $" + STARTING_WALLET + "***");
-		System.out.print("Would you like to 1.Add Player, 2.Start Betting: ");
+		boolean noPlayers = numPlayers == 0;
+		if (noPlayers) {
+			System.out.println("There are currently no players in this race.");
+			System.out.println("Please register for this race");
+		} else {
+			System.out.print("Would you like to 1.Add Player, 2.Start Betting: ");
+		}
 		final int ADD_PLAYER = 1;
-		while (getValidInput(1, 2) == ADD_PLAYER) {
+		while (noPlayers || getValidInput(1, 2) == ADD_PLAYER) {
 			System.out.print("The name of the player is(we will only record the first name): ");
 			additionalPlayerNames.add(keyboard.nextLine().split(" ")[FIRST_PART]);
 			System.out.print("Would you like to 1.Add Player, 2.Start Betting: ");
+			noPlayers = false;
 		}
+		System.out.println("No more players can be added during today's racess. Please wait until tomorrow.");
 		return additionalPlayerNames;
 	}
 
@@ -157,23 +168,30 @@ public class HorseRacingAssignment {
 		// horsesInRace)
 		int[][] playerBets = getPlayerBets(playerNames, playerWallets, horsesInRace, horses, ratings);
 
-		// an Array List because number of horses passing finish at the same time is unknown
+		// an Array List because number of horses passing finish at the same
+		// time is unknown
 		ArrayList<Integer> winningHorse = startRace(horsesInRace, horses, ratings);
 
 		payOutBets(playerBets, playerWallets, playerNames, winningHorse, ratings);
+
+		if (checkContinuation(playerWallets)) {
+			playerAllLost = true;
+			System.out.println(
+					"As all of the players have lost all of their money, we will be terminating this event early.");
+		}
 	}
 
 	// Randomly pick 5-8 horses to be in the race from horses array
 	private static int[] getHorsesInRace(String[] horses) {
 		final int MIN_NUM_HORSES = 5;
 		final int RANGE_NUM_HORSES = 4;
-		//pick random number of horses
+		// pick random number of horses
 		int numRaceHorses = (int) (Math.random() * RANGE_NUM_HORSES + MIN_NUM_HORSES);
 		// store the index of the horse in the horse array
 		int[] horsesInRace = new int[numRaceHorses];
 		for (int i = 0; i < numRaceHorses; i++) {
 			int randomIndex = (int) (Math.random() * horses.length);
-			//check if horse is already in race, if yes choose a new horse
+			// check if horse is already in race, if yes choose a new horse
 			while (alreadyInRace(randomIndex, horsesInRace)) {
 				randomIndex = (int) (Math.random() * horses.length);
 			}
@@ -182,8 +200,10 @@ public class HorseRacingAssignment {
 		return horsesInRace;
 	}
 
-	// Check if horse is already in race: Credits to Mr. Deslauriers for the method
-	// if method returns true than a new horse must be picked as it's in the race
+	// Check if horse is already in race: Credits to Mr. Deslauriers for the
+	// method
+	// if method returns true than a new horse must be picked as it's in the
+	// race
 	public static boolean alreadyInRace(int horse, int[] horsesInRace) {
 
 		for (int i = 0; i < horsesInRace.length; i++) {
@@ -198,34 +218,36 @@ public class HorseRacingAssignment {
 	private static int[][] getPlayerBets(String[] playerNames, int[] playerWallets, int[] horsesInRace, String[] horses,
 			int[] ratings) {
 		int[][] playerBets = new int[playerNames.length][2];
-		
-		//specifically for the playerBets array
-		final int BET_AMOUNT = 0; 
+
+		// specifically for the playerBets array
+		final int BET_AMOUNT = 0;
 		final int HORSE_BETTED = 1;
-		
+
 		final int MIN_BET = 1;
 		displayPlayers(playerNames, playerWallets);
 		boolean keepBetting = true;
 		while (keepBetting) {
 			System.out.print("Choose Player: ");
-			//make sure the player exists
-			int playerChoice = 0; 
+			// make sure the player exists
+			int playerChoice = 0;
 			boolean validChoice = false;
-			//check if the player is able to bet: he hasn't made a bet before and he isn't broke
-			while(!validChoice){
+			// check if the player is able to bet: he hasn't made a bet before
+			// and he isn't broke
+			while (!validChoice) {
 				playerChoice = getValidInput(1, playerNames.length) - ADJUST_TABLE_NUM;
-				if(playerBets[playerChoice][BET_AMOUNT] != 0) {
-					System.out.print(playerNames[playerChoice] + ", you cannot bet more than once in a race, please choose another player: ");
-				} 
-				else if(playerWallets[playerChoice] == 0){
-					System.out.println("Sorry " + playerNames[playerChoice] + ", you cannot bet because you are broke.");
+				if (playerBets[playerChoice][BET_AMOUNT] != 0) {
+					System.out.print(playerNames[playerChoice]
+							+ ", you cannot bet more than once in a race, please choose another player: ");
+				} else if (playerWallets[playerChoice] == 0) {
+					System.out
+							.println("Sorry " + playerNames[playerChoice] + ", you cannot bet because you are broke.");
 					System.out.println("Please choose another player: ");
-				}else{
+				} else {
 					validChoice = true;
-				}			
+				}
 
 			}
-			// find out how much player wants to bet, and validate the bet			
+			// find out how much player wants to bet, and validate the bet
 			System.out.println("Hello " + playerNames[playerChoice]);
 			System.out.print("How much would you like to bet, you have $" + playerWallets[playerChoice] + "? ");
 			playerBets[playerChoice][BET_AMOUNT] = getValidInput(MIN_BET, playerWallets[playerChoice]);
@@ -245,18 +267,18 @@ public class HorseRacingAssignment {
 
 	}
 
-	
-
+	// display the players in a table
 	private static void displayPlayers(String[] playerNames, int[] playerWallets) {
 		System.out.println("");
 		System.out.printf("%s" + "|" + "%-20s" + "|" + "%-10s|\n", "#", "Player Name", "Wallet");
 		System.out.println("-|--------------------|----------|");
 		for (int j = 0; j < playerNames.length; j++) {
-			System.out.printf("%d" + "|" + "%-20s|%10.2f" + "|\n", j + ADJUST_TABLE_NUM, playerNames[j], (double) playerWallets[j]);
+			System.out.printf("%d" + "|" + "%-20s|%10.2f" + "|\n", j + ADJUST_TABLE_NUM, playerNames[j],
+					(double) playerWallets[j]);
 			System.out.println("-|--------------------|----------|");
 		}
 	}
-
+// display the horses in a table
 	private static void diplayHorses(int[] horsesInRace, String[] horses, int[] ratings) {
 		System.out.printf("%s" + "|" + "%-20s" + "-%10s" + "|\n", "#", "Horse Name", "Ratings");
 		System.out.println("-|--------------------|----------|");
@@ -265,13 +287,14 @@ public class HorseRacingAssignment {
 			for (int i = 0; i < ratings[horsesInRace[j]]; i++) {
 				ratingStars += "*";
 			}
-			System.out.printf("%d" + "|" + "%-20s" + "|" + "%-10s" + "|\n", j + ADJUST_TABLE_NUM, horses[horsesInRace[j]],
-					ratingStars);
+			System.out.printf("%d" + "|" + "%-20s" + "|" + "%-10s" + "|\n", j + ADJUST_TABLE_NUM,
+					horses[horsesInRace[j]], ratingStars);
 			System.out.println("-|--------------------|----------|");
 
 		}
 	}
 
+	//make sure that the input is between the valid range, and that the input is a number
 	public static int getValidInput(int min, int max) {
 		boolean isValid = false;
 		int x = 0;
@@ -281,7 +304,7 @@ public class HorseRacingAssignment {
 				if (x >= min && x <= max)
 					isValid = true;
 				else
-					System.out.print("Please enter a number between " + min + " and " + max + ": ");
+					System.out.print("Please enter a whole number between " + min + " and " + max + ": ");
 			} catch (Exception ex) {
 				System.out.print("Please enter a number between " + min + " and " + max + ": ");
 			}
@@ -296,7 +319,8 @@ public class HorseRacingAssignment {
 		int[] spaces = new int[horsesInRace.length];
 		double[] maxSpaces = { 4, 4.5, 5, 5.5, 6 };
 		ArrayList<Integer> winningHorse = new ArrayList<>();
-		//must initialize with one so that there is enough space of the horse number
+		// must initialize with one so that there is enough space of the horse
+		// number
 		for (int i = 0; i < horsesInRace.length; i++) {
 			spaces[i] = 1;
 		}
@@ -328,9 +352,9 @@ public class HorseRacingAssignment {
 			}
 
 		}
-		System.out.print("The following horses have won: ");
+		System.out.println("The following horses have won: ");
 		for (int i = 0; i < winningHorse.size(); i++) {
-			System.out.println("\t" + horses[winningHorse.get(i)]);
+			System.out.println("\t -->" + horses[winningHorse.get(i)]);
 		}
 		return winningHorse;
 	}
@@ -340,20 +364,31 @@ public class HorseRacingAssignment {
 		// TODO Auto-generated method stub
 		double[] ratingsMultiplier = { 2, 1.25, 1, 0.75, 0.5 };
 		for (int i = 0; i < playerNames.length; i++) {
-			if (playerBets[i][1] != -1) {
+			if (playerBets[i][1] != 0) {
 				boolean hasWon = false;
 				for (int j = 0; j < winningHorse.size(); j++) {
 					if (playerBets[i][1] == (int) winningHorse.get(j)) {
-						playerWallets[i] += playerBets[i][0] * ratingsMultiplier[ratings[(int) winningHorse.get(j)]];
+						Double reward = playerBets[i][0] * ratingsMultiplier[ratings[(int) winningHorse.get(j)]];
+						playerWallets[i] += reward;
 						hasWon = true;
+						System.out.println("Congratulations " + playerNames[i] + ", you have earned $" + reward);
 						break;
 					}
 				}
 				if (!hasWon) {
 					playerWallets[i] -= playerBets[i][0];
+					System.out.println("Sorry " + playerNames[i] + ", you have lost $" + playerBets[i][0]);
 				}
 			}
 		}
+	}
+
+	private static boolean checkContinuation(int[] playerWallets) {
+		for (int i = 0; i < playerWallets.length; i++) {
+			if (playerWallets[i] < 1)
+				return false;
+		}
+		return true;
 	}
 
 	private static boolean promptForGameOver() {
