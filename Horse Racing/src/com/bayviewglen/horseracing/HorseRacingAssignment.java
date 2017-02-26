@@ -313,6 +313,7 @@ public class HorseRacingAssignment {
 		return x;
 	}
 
+	//show the race
 	private static ArrayList<Integer> startRace(int[] horsesInRace, String[] horses, int[] ratings) {
 		boolean raceOver = false;
 		final int ARRAY_ELEMENT_ADJUSTER = 1;
@@ -324,12 +325,14 @@ public class HorseRacingAssignment {
 		for (int i = 0; i < horsesInRace.length; i++) {
 			spaces[i] = 1;
 		}
+		//print the race
 		while (!raceOver) {
 			System.out.println();
 			System.out.println();
 			System.out.println();
 			System.out.println(
 					"--------------------|--------------------------------------------------------------------------------");
+			//if a horse finishes keep track of the horse/s and end the race
 			for (int i = 0; i < horsesInRace.length; i++) {
 				if (spaces[i] >= 80) {
 					winningHorse.add(horsesInRace[i]);
@@ -342,7 +345,6 @@ public class HorseRacingAssignment {
 						"--------------------|--------------------------------------------------------------------------------");
 
 				spaces[i] += (int) (Math.random() * maxSpaces[ratings[horsesInRace[i]] - ARRAY_ELEMENT_ADJUSTER]);
-				// System.out.print(spaces[i] + ", " );
 			}
 			System.out.println();
 			try {
@@ -359,9 +361,9 @@ public class HorseRacingAssignment {
 		return winningHorse;
 	}
 
+	//pay out the bets,or take the money form the players away
 	private static void payOutBets(int[][] playerBets, int[] playerWallets, String[] playerNames,
 			ArrayList<Integer> winningHorse, int[] ratings) {
-		// TODO Auto-generated method stub
 		double[] ratingsMultiplier = { 2, 1.25, 1, 0.75, 0.5 };
 		for (int i = 0; i < playerNames.length; i++) {
 			if (playerBets[i][1] != 0) {
@@ -383,6 +385,7 @@ public class HorseRacingAssignment {
 		}
 	}
 
+	//check if all the players are broke, if yes end the game
 	private static boolean checkContinuation(int[] playerWallets) {
 		for (int i = 0; i < playerWallets.length; i++) {
 			if (playerWallets[i] < 1)
@@ -391,15 +394,15 @@ public class HorseRacingAssignment {
 		return true;
 	}
 
+	//ask if game will end
 	private static boolean promptForGameOver() {
 		System.out.print("Would you like to end the game, please enter either yes or no: ");
 		String response = keyboard.nextLine();
 		return checkYesNo(keyboard, response);
 
 	}
-
+	//checker for if the game chould be over, ensures either yes or no is selected
 	private static boolean checkYesNo(Scanner keyboard, String message) {
-		// TODO Auto-generated method stub
 		while (!(message.toLowerCase().equals("yes") || message.toLowerCase().equals("no"))) {
 			System.out.print("Please enter either yes or no:");
 			message = keyboard.nextLine();
@@ -407,6 +410,7 @@ public class HorseRacingAssignment {
 		return message.toLowerCase().equals("yes");
 	}
 
+	//writes new data to the player file, removes any broke players
 	private static void updatePlayerData(String[] playerNames, int[] playerWallets) {
 		FileWriter fw;
 		try {
@@ -433,6 +437,7 @@ public class HorseRacingAssignment {
 
 	}
 
+	//message at the end of the race
 	private static void closingMessage() {
 		System.out.println("Thank you for playing at Aliqyan's Magnifient Horse Racing Parlour!");
 		System.out.println("We hope to see you soon!");
