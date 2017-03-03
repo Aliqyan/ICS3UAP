@@ -40,7 +40,7 @@ public class HorseRacingAssignment {
 	}
 
 	private static void introMessage() {
-		System.out.println("Welcome to Aliqyan's Magnificant Horse Racing Parlour");
+		System.out.println("Welcome to Aliqyan's Magnificent Horse Racing Parlour");
 		sleep(FAST);
 		System.out.println("We wish you the best of luck and hope you have lots of fun!");
 		sleep(SLOW);
@@ -104,22 +104,24 @@ public class HorseRacingAssignment {
 
 	// Gather all the players in the player file + those requested
 	private static String[] getPlayerNames() {
+		String[] previousPlayerNames = null;
 		String[] playerNames = null;
 
 		try {
 			Scanner scanner = new Scanner(new File("input/player.dat"));
 			int numPlayers = Integer.parseInt(scanner.nextLine());
-
+			previousPlayerNames = new String[numPlayers];
+			for (int i = 0; i < numPlayers; i++) {
+				previousPlayerNames[i] = (scanner.nextLine()).split(" ")[FIRST_PART];
+			}
 			// ask for additional players
-			ArrayList<String> additionalPlayerNames = getAdditionalPlayers(numPlayers);
-
+			ArrayList<String> additionalPlayerNames = getAdditionalPlayers(numPlayers, previousPlayerNames);
 			playerNames = new String[numPlayers + additionalPlayerNames.size()];
-
 			for (int i = 0; i < playerNames.length; i++) {
 				// add players in the file first, then add the additional
 				// players, if there are any
 				if (i < numPlayers) {
-					playerNames[i] = (scanner.nextLine()).split(" ")[FIRST_PART];
+					playerNames[i] = previousPlayerNames[i];
 				} else {
 					playerNames[i] = additionalPlayerNames.get(i - numPlayers);
 				}
@@ -135,10 +137,10 @@ public class HorseRacingAssignment {
 	}
 
 	// ask for any new players
-	private static ArrayList<String> getAdditionalPlayers(int numPlayers) {
+	private static ArrayList<String> getAdditionalPlayers(int numPlayers, String[] previousPlayerNames) {
 		ArrayList<String> additionalPlayerNames = new ArrayList<String>();
 		System.out.println("***Please note that all new players begin with a standard $" + STARTING_WALLET + "***");
-		boolean noPlayers = numPlayers == 0;
+		boolean noPlayers = (numPlayers == 0);
 		if (noPlayers) {
 			System.out.println("There are currently no players in this race.");
 			System.out.println("Please register for this race");
@@ -148,13 +150,31 @@ public class HorseRacingAssignment {
 		final int ADD_PLAYER = 1;
 		while (noPlayers || getValidInput(1, 2) == ADD_PLAYER) {
 			System.out.print("The name of the player is(we will only record the first name): ");
-			additionalPlayerNames.add(keyboard.nextLine().split(" ")[FIRST_PART]);
+			String name = keyboard.nextLine().split(" ")[FIRST_PART];
+			while(playerAlreadyInRace(previousPlayerNames, additionalPlayerNames, name)){
+				System.out.println("A player with this first name is in the race,");
+				System.out.print("We are extremely sorry for this inconvenience, please enter a nick name or another name that you feel comfortable to go by : ");
+				name = keyboard.nextLine().split(" ")[FIRST_PART];
+			}
+			additionalPlayerNames.add(name);
 			System.out.print("Would you like to 1.Add Player, 2.Start Betting: ");
 			noPlayers = false;
 		}
 		System.out.println("No more players can be added during today's racess. Please wait until tomorrow.");
 		sleep(MEDIUM);
 		return additionalPlayerNames;
+	}
+
+	private static boolean playerAlreadyInRace(String[] previousPlayerNames, ArrayList<String> additionalPlayerNames,
+			String name) {
+		for(int i = 0; i < previousPlayerNames.length; i++){
+			if((previousPlayerNames[i]).toLowerCase().equals(name)) return true;
+		}
+
+		for(int i = 0; i < additionalPlayerNames.size(); i++){
+			if((additionalPlayerNames.get(i)).toLowerCase().equals(name)) return true;
+		}
+		return false;
 	}
 
 	// Gather amount players have + add a standard amount to new players
@@ -193,6 +213,7 @@ public class HorseRacingAssignment {
 		ArrayList<Integer> winningHorse = startRace(horsesInRace, horses, ratings);
 
 		payOutBets(playerBets, playerWallets, playerNames, winningHorse, ratings);
+		
 		if (checkContinuation(playerWallets)) {
 			playerAllLost = true;
 			System.out.println(
@@ -279,7 +300,7 @@ public class HorseRacingAssignment {
 				System.out.print("Which horse would you like to bet on? ");
 				choice = getValidInput(1, horsesInRace.length);
 			}
-			playerBets[playerChoice][HORSE_BETTED] = choice;
+			playerBets[playerChoice][HORSE_BETTED] = horsesInRace[choice-1];
 			boolean allBetted = true;
 			for (int i = 0; i < playerNames.length; i++) {
 				if (playerBets[i][0] == 0) {
@@ -396,12 +417,7 @@ public class HorseRacingAssignment {
 
 				spaces[i] += (int) (Math.random() * maxSpaces[ratings[horsesInRace[i]] - ARRAY_ELEMENT_ADJUSTER]);
 			}
-			System.out.println();
-			try {
-				Thread.sleep(100);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
+			sleep(SUPERFAST);
 
 		}
 		System.out.println("The following horses have won: ");
@@ -495,7 +511,7 @@ public class HorseRacingAssignment {
 
 	// message at the end of the race
 	private static void closingMessage() {
-		System.out.println("Thank you for playing at Aliqyan's Magnifient Horse Racing Parlour!");
+		System.out.println("Thank you for playing at Aliqyan's Magnificent Horse Racing Parlour!");
 		System.out.println("We hope to see you soon!");
 	}
 }
