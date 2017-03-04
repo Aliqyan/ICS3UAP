@@ -1,4 +1,3 @@
-
 package com.bayviewglen.horseracing;
 
 import java.io.File;
@@ -15,11 +14,10 @@ public class HorseRacingAssignment {
 	static boolean playersAllLost = false;
 	static final int ARRAY_ELEMENT_ADJUSTER = 1;
 
-	// time speeds in seconds
+	// times in milliseconds
 	static final int SLOW = 2000;
 	static final int MEDIUM = 1000;
-	static final int FAST = 500;
-	static final int SUPERFAST = 200;
+	static final int FAST = 200;
 
 	static int raceNumber = 1;
 
@@ -49,7 +47,7 @@ public class HorseRacingAssignment {
 		sleep(FAST);
 		System.out.println("We wish you the best of luck and hope you have lots of fun!");
 		sleep(SLOW);
-		lineSpacer(30);
+		lineSpacer(50);
 	}
 
 	// make the thread sleep for however many minutes told to
@@ -285,13 +283,15 @@ public class HorseRacingAssignment {
 		final int HORSE_BETTED = 1;
 
 		final int MIN_BET = 1;
-		
+
 		System.out.println("\nIt is time to make bets for Race #" + raceNumber);
 		System.out.println("-----------------------------------");
-		displayPlayers(playerNames, playerWallets);
+		sleep(MEDIUM);
+
 		boolean keepBetting = true;
 		while (keepBetting) {
-			System.out.print("Choose Player: ");
+			displayPlayers(playerNames, playerWallets);
+			System.out.print("\nChoose Player: ");
 			// make sure the player exists
 			int playerChoice = 0;
 			boolean validChoice = false;
@@ -327,17 +327,19 @@ public class HorseRacingAssignment {
 			// This stores the index of the horse's name from the horses array
 			playerBets[playerChoice][HORSE_BETTED] = horsesInRace[choice - ADJUST_TABLE_NUM];
 
-			keepBetting = contBettingOrStart(playerNames, playerBets);
+			keepBetting = contBettingOrStart(playerBets, playerWallets);
 		}
 		return playerBets;
 
 	}
 
 	// check if players want to keep betting, or if all have made bets
-	private static boolean contBettingOrStart(String[] playerNames, int[][] playerBets) {
+	private static boolean contBettingOrStart(int[][] playerBets, int[] playerWallets) {
 		boolean allBetted = true;
-		for (int i = 0; i < playerNames.length; i++) {
-			if (playerBets[i][0] == 0) {
+		for (int i = 0; i < playerWallets.length; i++) {
+			// if a player hasn't made a bet that can make a bet, not all have
+			// betted
+			if (playerBets[i][0] == 0 && playerWallets[i] != 0) {
 				allBetted = false;
 				break;
 			}
@@ -349,7 +351,7 @@ public class HorseRacingAssignment {
 				return true;
 			}
 		} else {
-			System.out.print("All the players have made bets, It's time to race! ");
+			System.out.print("All the players that are able to bet have made bets, It's time to race! ");
 			sleep(MEDIUM);
 		}
 		return false;
@@ -394,12 +396,17 @@ public class HorseRacingAssignment {
 				if (choice >= min && choice <= max) {
 					isValid = true;
 				} else {
-					if(min == max)System.out.print("You only have one choice. You have to pick " + min + ": ");
-					else System.out.print("Please enter a whole number between " + min + " and " + max + "(inclusive): ");
+					if (min == max)
+						System.out.print("You only have one choice. You have to pick " + min + ": ");
+					else
+						System.out
+								.print("Please enter a whole number between " + min + " and " + max + "(inclusive): ");
 				}
 			} catch (Exception ex) {
-				if(min == max)System.out.print("You only have one choice. You have to pick " + min + ": ");
-				else System.out.print("Please enter a whole number between " + min + " and " + max + "(inclusive): ");
+				if (min == max)
+					System.out.print("You only have one choice. You have to pick " + min + ": ");
+				else
+					System.out.print("Please enter a whole number between " + min + " and " + max + "(inclusive): ");
 			}
 		}
 
@@ -412,12 +419,12 @@ public class HorseRacingAssignment {
 		int[] spaces = new int[horsesInRace.length];
 
 		// the index + 1 corresponds to the value of the horse's ratings
-		double[] maxSpaces = { 4, 4.5, 5, 5.5, 6 };
+		double[] maxSpaces = { 3, 3.25, 3.5, 3.75, 4 };
 
 		ArrayList<Integer> winningHorse = new ArrayList<>();
 
 		// display a cool count down
-		System.out.println("\nIt is now time to commence Race # " + raceNumber++ + " in: ");
+		System.out.println("\nStarting Race #" + raceNumber++ + " in: ");
 		sleep(MEDIUM);
 		for (int i = 3; i >= 0; i--) {
 			if (i == 0) {
@@ -455,7 +462,7 @@ public class HorseRacingAssignment {
 				// depending on ratings
 				spaces[i] += (int) (Math.random() * maxSpaces[ratings[horsesInRace[i]] - ARRAY_ELEMENT_ADJUSTER]);
 			}
-			sleep(SUPERFAST);
+			sleep(FAST);
 		}
 		// display winning horses
 		System.out.println("The following horses have won: ");
@@ -472,8 +479,9 @@ public class HorseRacingAssignment {
 		// rating of the horse
 		double[] ratingsMultiplier = { 2, 1.5, 1, 0.75, 0.5 };
 		// display the ratings formula
-		System.out.println("\nThe following table shows how this parlour awards winnings, based on the horse's ratings.");
-		sleep(MEDIUM);
+		System.out
+				.println("\nThe following table shows how this parlour awards winnings, based on the horse's ratings.");
+		sleep(SLOW);
 		displayRatingsFormula(ratingsMultiplier);
 		sleep(MEDIUM);
 		for (int i = 0; i < playerNames.length; i++) {
@@ -481,7 +489,8 @@ public class HorseRacingAssignment {
 				boolean hasWon = false;
 				for (int j = 0; j < winningHorse.size(); j++) {
 					if (playerBets[i][1] == (int) winningHorse.get(j)) {
-						Double reward = playerBets[i][0] * ratingsMultiplier[ratings[(int) winningHorse.get(j)]-ARRAY_ELEMENT_ADJUSTER];
+						int reward = (int) (playerBets[i][0]
+								* ratingsMultiplier[ratings[(int) winningHorse.get(j)] - ARRAY_ELEMENT_ADJUSTER]);
 						playerWallets[i] += reward;
 						hasWon = true;
 						System.out.println("Congratulations " + playerNames[i] + ", you have earned $" + reward);
@@ -491,6 +500,7 @@ public class HorseRacingAssignment {
 				if (!hasWon) {
 					playerWallets[i] -= playerBets[i][0];
 					System.out.println("Sorry " + playerNames[i] + ", you have lost $" + playerBets[i][0]);
+
 				}
 			}
 		}
@@ -502,7 +512,12 @@ public class HorseRacingAssignment {
 		System.out.printf("%8s" + "|" + "%12s|\n", "Ratings", "Multiplier");
 		System.out.println("--------|------------|");
 		for (int i = 0; i < ratingsMultiplier.length; i++) {
-			System.out.printf("%8d" + "|" + "%12.2f" + "|\n", i + ADJUST_TABLE_NUM, ratingsMultiplier[i]);
+			String ratings = "";
+			// show the amount of stars (i.e. rating)
+			for (int j = 0; j < i + ADJUST_TABLE_NUM; j++) {
+				ratings += "*";
+			}
+			System.out.printf("%8s" + "|" + "%12.2f" + "|\n", ratings, ratingsMultiplier[i]);
 			System.out.println("--------|------------|");
 		}
 	}
@@ -570,6 +585,7 @@ public class HorseRacingAssignment {
 
 	// message at the end of the race
 	private static void closingMessage() {
+		sleep(MEDIUM);
 		System.out.println("Thank you for playing at Aliqyan's Magnificent Horse Racing Parlour!");
 		System.out.println("We hope to see you soon!");
 	}
