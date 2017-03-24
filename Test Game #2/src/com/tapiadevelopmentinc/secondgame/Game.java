@@ -18,7 +18,7 @@ public class Game extends Canvas implements Runnable {
 	
 	public Game(){
 				
-		new Window(WIDTH, HEIGHT, "LETS BUILD A GAME", this);
+		new Window("LETS BUILD A GAME", HEIGHT, WIDTH, this);
 		
 		
 		

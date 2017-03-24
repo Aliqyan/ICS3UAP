@@ -16,13 +16,13 @@ public class KeyInput extends KeyAdapter {
 	
 	public void keyPressed(KeyEvent e){
 		int currKey = e.getKeyCode();
-		System.out.println(currKey);
+		//System.out.println(currKey);
 		
 			GameObject tempObject = handler.object.get(0);
 			if(tempObject.getID() == ID.Snake){
 				//key events for player 1
 				if(currKey == UP && !vertical){
-					System.out.println("up");
+					//System.out.println("up");
 					tempObject.setVert(1);
 					tempObject.setHoriz(0);
 
@@ -30,7 +30,7 @@ public class KeyInput extends KeyAdapter {
 					horizontal = false;
 				}
 				if(currKey == DOWN && !vertical){
-					System.out.println("down");
+					//System.out.println("down");
 					tempObject.setVert(2);
 					tempObject.setHoriz(0);
 
@@ -38,7 +38,7 @@ public class KeyInput extends KeyAdapter {
 					horizontal = false;
 				}
 				if(currKey == RIGHT && !horizontal){
-					System.out.println("right");
+					//System.out.println("right");
 					tempObject.setVert(0);
 					tempObject.setHoriz(2);
 
@@ -47,7 +47,7 @@ public class KeyInput extends KeyAdapter {
 
 				}
 				if(currKey == LEFT && !horizontal){
-					System.out.println("left");
+					//System.out.println("left");
 					tempObject.setVert(0);
 					tempObject.setHoriz(1);
 

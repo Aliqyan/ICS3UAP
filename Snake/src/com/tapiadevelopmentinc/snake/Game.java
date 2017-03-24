@@ -5,14 +5,16 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.image.BufferStrategy;
 
+import javax.swing.JLabel;
+
 
 
 public class Game extends Canvas implements Runnable {
 
 	
 	private static final long serialVersionUID = 6503812276980334303L;
-	private boolean running = false;
-	private Thread thread;
+	private static boolean running = false;
+	private static Thread thread;
 	public static final int WIDTH = 600, HEIGHT = 422;
 	
 	private Handler handler;
@@ -23,8 +25,12 @@ public class Game extends Canvas implements Runnable {
 		handler = new Handler();
 		this.addKeyListener(new KeyInput(handler));
 
-		new Window("hu", WIDTH, HEIGHT, this);
+		new Window("Snake!", WIDTH, HEIGHT, this);
 		handler.addObject(new Snake( (int)((WIDTH/2 - 20)/20) *20 , (int)((HEIGHT/2 - 20)/20) * 20, ID.Snake, handler));
+		int foodX = (int)((Math.random() * WIDTH)/20) *20;
+		int foodY = (int)((Math.random() * HEIGHT)/20) *20;
+		foodX = Game.clamp(foodX, 0, Game.WIDTH - 20);
+		foodY = Game.clamp(foodY, 0, Game.HEIGHT - 42);;
 		handler.addObject(new Food( (int)((Math.random() * WIDTH)/20) *20 , (int)((Math.random() * HEIGHT)/20) *20, ID.Food, handler));
 
 
@@ -65,7 +71,8 @@ public class Game extends Canvas implements Runnable {
 		thread.start();
 		running = true;		
 	}
-	public synchronized void stop() {
+	
+	public synchronized static void stop() {
 		try{
 			thread.join();
 			running = false;
@@ -83,8 +90,11 @@ public class Game extends Canvas implements Runnable {
 		g.setColor(Color.black);
 		g.fillRect(0, 0, WIDTH, HEIGHT);
 		
+		
+		
 		handler.render(g);
 		
+
 		//hud.render(g);
 		bs.show();		
 
