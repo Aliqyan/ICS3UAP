@@ -28,7 +28,7 @@ public class Food extends GameObject {
 	public void render(Graphics g) {
 		g.setColor(Color.red);
 
-		g.fillRect(x+2, y+2, 16, 16);
+		g.fillOval(x+2, y+2, 16, 16);
 		
 		
 	}

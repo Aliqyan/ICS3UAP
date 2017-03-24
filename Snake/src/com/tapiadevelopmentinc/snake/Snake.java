@@ -13,7 +13,7 @@ public class Snake extends GameObject {
 	Random r = new Random();
 	Handler handler;
 	int velX = 0, velY = 0;
-	int snakeSize = 1;
+	static int snakeSize = 1;
 	ArrayList<Integer> positionX = new ArrayList<Integer>();
 	ArrayList<Integer> positionY = new ArrayList<Integer>();
 	int dir = 0;
@@ -67,15 +67,16 @@ public class Snake extends GameObject {
 		x = Game.clamp(x, 0, Game.WIDTH - 20);
 		y = Game.clamp(y, 0, Game.HEIGHT - 42);
 		
-			positionX.add(0, x);
-			positionY.add(0, y);
-			//System.out.println(positionX);
-			//System.out.println(positionY);
-			//System.out.println();
+		positionX.add(0, x);
+		positionY.add(0, y);
 		
-		if(positionX.size() > 100){
-			positionX.subList(100, positionX.size()).clear();
-			positionY.subList(100, positionY.size()).clear();
+		//System.out.println(positionX);
+		//System.out.println(positionY);
+		//System.out.println();
+		
+		if(positionX.size() > (snakeSize+1)*4){
+			positionX.subList((snakeSize+1)*4+1, positionX.size()).clear();
+			positionY.subList((snakeSize+1)*4+1, positionY.size()).clear();
 
 		}
 		collision();
@@ -96,7 +97,7 @@ public class Snake extends GameObject {
 					Food.y = (int)((Math.random() * Game.HEIGHT)/20) *20;
 					Food.x = Game.clamp(Food.x, 0, Game.WIDTH - 20);
 					Food.y = Game.clamp(Food.y, 0, Game.HEIGHT - 42);
-					System.out.println( Food.x + " , " + Food.y);
+					//System.out.println( Food.x + " , " + Food.y);
 					snakeSize++;
 					//placement();
 					//handler.addObject(new SnakeBody( positionX.get(1), positionY.get(1), ID.SnakeBody, handler));
@@ -109,7 +110,9 @@ public class Snake extends GameObject {
 	
 	//collision of snake head and body
 	private boolean snakeCollision() {
-		for(int i = 4; i < (snakeSize-1)*4; i+=4){
+
+		for(int i = 4; i < (snakeSize)*4; i++){
+			
 			if(x == (int)positionX.get(i) && y == (int)positionY.get(i)){
 				return true;
 			}

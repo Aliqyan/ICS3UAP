@@ -2,6 +2,7 @@ package com.tapiadevelopmentinc.snake;
 
 import java.awt.Canvas;
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.image.BufferStrategy;
 
@@ -27,6 +28,7 @@ public class Game extends Canvas implements Runnable {
 
 		new Window("Snake!", WIDTH, HEIGHT, this);
 		handler.addObject(new Snake( (int)((WIDTH/2 - 20)/20) *20 , (int)((HEIGHT/2 - 20)/20) * 20, ID.Snake, handler));
+		
 		int foodX = (int)((Math.random() * WIDTH)/20) *20;
 		int foodY = (int)((Math.random() * HEIGHT)/20) *20;
 		foodX = Game.clamp(foodX, 0, Game.WIDTH - 20);
@@ -87,10 +89,17 @@ public class Game extends Canvas implements Runnable {
 			return;
 		}
 		Graphics g = bs.getDrawGraphics();
-		g.setColor(Color.black);
+
+		g.setColor(Color.blue);
 		g.fillRect(0, 0, WIDTH, HEIGHT);
 		
-		
+		Font currentFont = g.getFont();
+		int fontSize = (int) (currentFont.getSize() *2F);
+		Font newFont = new Font("Courier New", 1, fontSize);
+		g.setFont(newFont);
+		g.setColor(Color.white);
+		g.drawString("Score: " + Snake.snakeSize, 20, 35);
+
 		
 		handler.render(g);
 		
