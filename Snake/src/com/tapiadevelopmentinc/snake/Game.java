@@ -34,7 +34,7 @@ public class Game extends Canvas implements Runnable {
 		End
 	};
 	
-	public static STATE gameState = STATE.End;
+	public static STATE gameState = STATE.Game;
 	
 	public static void JFrameAdjuster(){
 		if(OSFinder.isMac()){
