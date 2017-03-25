@@ -7,7 +7,7 @@ public class KeyInput extends KeyAdapter {
 	private Handler handler;
 	final int UP = KeyEvent.VK_W, DOWN = KeyEvent.VK_S, LEFT = KeyEvent.VK_A, RIGHT = KeyEvent.VK_D;
 	boolean horizontal = false, vertical = false;
-	int currKey = 0;
+	static int currKey = 0;
 	int prevKey = 0;
 	
 	public KeyInput(Handler handler) {

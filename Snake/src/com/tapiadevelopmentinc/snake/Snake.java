@@ -6,6 +6,8 @@ import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.Random;
 
+import com.tapiadevelopmentinc.snake.Game.STATE;
+
 
 
 public class Snake extends GameObject {
@@ -74,15 +76,20 @@ public class Snake extends GameObject {
 		//System.out.println(positionY);
 		//System.out.println();
 		
-		if(positionX.size() > (snakeSize+1)*4){
-			positionX.subList((snakeSize+1)*4+1, positionX.size()).clear();
-			positionY.subList((snakeSize+1)*4+1, positionY.size()).clear();
+		if(positionX.size() > 1000){
+			positionX.subList(1000, positionX.size()).clear();
+			positionY.subList(1000, positionY.size()).clear();
 
 		}
 		collision();
 		if(snakeCollision()){
-			System.out.println("You lose!");
-			Game.stop();
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			Game.gameState = STATE.End;
 		}
 
 	}
@@ -95,7 +102,7 @@ public class Snake extends GameObject {
 				if(getBounds().intersects(tempObject.getBounds())){
 					Food.x = (int)((Math.random() * Game.WIDTH)/20) *20;
 					Food.y = (int)((Math.random() * Game.HEIGHT)/20) *20;
-					Food.x = Game.clamp(Food.x, 0, Game.WIDTH - 20);
+					Food.x = 40;//Game.clamp(Food.x, 0, Game.WIDTH - 20);
 					Food.y = Game.clamp(Food.y, 0, Game.HEIGHT - 42);
 					//System.out.println( Food.x + " , " + Food.y);
 					snakeSize++;

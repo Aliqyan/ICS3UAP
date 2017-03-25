@@ -25,7 +25,7 @@ public class Window extends Canvas{
 		myFrame.setSize(width, height);
 		myFrame.setResizable(false);
 		myFrame.setLocationRelativeTo(null);
-		
+		myFrame.setExtendedState(JFrame.MAXIMIZED_BOTH);
         myFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
 		

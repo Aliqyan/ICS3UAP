@@ -16,26 +16,53 @@ public class Game extends Canvas implements Runnable {
 	private static final long serialVersionUID = 6503812276980334303L;
 	private static boolean running = false;
 	private static Thread thread;
-	public static final int WIDTH = 600, HEIGHT = 422;
-	
+	public static final int WIDTH = 640, HEIGHT = 502;
+	public static int adjuster = 0;
+	private Menu menu;
 	private Handler handler;
+	
+	public enum STATE {
+		Menu,
+		Help,
+		Game,
+		End
+	};
+	
+	public static STATE gameState = STATE.Menu;
+	
+	public void JFrameAdjuster(){
+		if(OSFinder.isMac()){
+			adjuster = 22;
+		}else if(OSFinder.isWindows()){
+			adjuster = 22;
+		}
+	} 
 	public static void main(String[] args) {
+		System.out.println(System.getProperty("os.name"));
 		new Game();
 	}
 	public Game(){
 		handler = new Handler();
-		this.addKeyListener(new KeyInput(handler));
+		menu = new Menu(this, handler);
 
+		this.addKeyListener(new KeyInput(handler));
+		this.addMouseListener(menu);
 		new Window("Snake!", WIDTH, HEIGHT, this);
+		if(gameState == STATE.Game){
+			loadGame();
+		}
+		
+
+
+	}
+	public void loadGame(){
 		handler.addObject(new Snake( (int)((WIDTH/2 - 20)/20) *20 , (int)((HEIGHT/2 - 20)/20) * 20, ID.Snake, handler));
 		
 		int foodX = (int)((Math.random() * WIDTH)/20) *20;
 		int foodY = (int)((Math.random() * HEIGHT)/20) *20;
 		foodX = Game.clamp(foodX, 0, Game.WIDTH - 20);
 		foodY = Game.clamp(foodY, 0, Game.HEIGHT - 42);;
-		handler.addObject(new Food( (int)((Math.random() * WIDTH)/20) *20 , (int)((Math.random() * HEIGHT)/20) *20, ID.Food, handler));
-
-
+		handler.addObject(new Food( foodX , foodY, ID.Food, handler));
 	}
 	@Override
 	public void run() {
@@ -90,18 +117,24 @@ public class Game extends Canvas implements Runnable {
 		}
 		Graphics g = bs.getDrawGraphics();
 
-		g.setColor(Color.blue);
+		g.setColor(Color.black);
 		g.fillRect(0, 0, WIDTH, HEIGHT);
 		
-		Font currentFont = g.getFont();
-		int fontSize = (int) (currentFont.getSize() *2F);
-		Font newFont = new Font("Courier New", 1, fontSize);
-		g.setFont(newFont);
-		g.setColor(Color.white);
-		g.drawString("Score: " + Snake.snakeSize, 20, 35);
-
 		
-		handler.render(g);
+
+		if(gameState == STATE.Game){
+			Font currentFont = g.getFont();
+			int fontSize = (int) (currentFont.getSize() *2F);
+			Font newFont = new Font("Courier New", 1, fontSize);
+			g.setFont(newFont);
+			g.setColor(Color.white);
+			g.drawString("Score: " + Snake.snakeSize, 20, 35);
+			handler.render(g);
+			
+		}else if(gameState == STATE.Menu ||gameState == STATE.Help || gameState == STATE.End){
+			menu.render(g);
+		}
+		
 		
 
 		//hud.render(g);
@@ -110,7 +143,11 @@ public class Game extends Canvas implements Runnable {
 		g.dispose();
 	}
 	private void tick() {
-		handler.tick();
+		if(gameState == STATE.Game){
+			handler.tick();
+		}else if(gameState == STATE.Menu || gameState == STATE.End){
+			menu.tick();
+		}
 		
 	}
 	public static int clamp(int var, int min, int max){
