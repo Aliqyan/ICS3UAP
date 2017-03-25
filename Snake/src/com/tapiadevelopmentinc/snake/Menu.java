@@ -20,7 +20,7 @@ public class Menu extends MouseAdapter{
 		int mY = e.getY();
 	
 		//try again button for end
-		if(game.gameState == STATE.End && mouseOver(mX, mY, 210, 350,200,64)){
+		if(game.gameState == STATE.End && mouseOver(mX, mY, (game.width-game.adjusterX-300)/4, 600, 300, 96) ){
 			KeyInput.currKey = 0;
 			Snake.snakeSize = 1;
 			handler.object.clear();
@@ -30,6 +30,10 @@ public class Menu extends MouseAdapter{
 				
 			return;
 		}
+		// back button for end
+		if(game.gameState == STATE.End && mouseOver(mX, mY, (game.width-game.adjusterX-300)/4 * 3, 600, 300, 96) ){
+			System.exit(1);
+		}
 			
 		//back button for help
 		if(game.gameState == STATE.Help && mouseOver(mX, mY, 210, 350,200,64)){
@@ -38,24 +42,17 @@ public class Menu extends MouseAdapter{
 		}
 		if(game.gameState == STATE.Menu){
 			//play button
-			if(mouseOver(mX, mY, 210,150,200,64)){
+			if(mouseOver(mX, mY, (game.width-game.adjusterX-300)/2, 300, 300, 96)){
 				game.gameState = STATE.Game;
-				handler.addObject(new Snake( (int)((Game.WIDTH/2 - 20)/20) *20 , (int)((Game.HEIGHT/2 - 20)/20) * 20, ID.Snake, handler));
-				
-				int foodX = (int)((Math.random() * Game.WIDTH)/20) *20;
-				int foodY = (int)((Math.random() * Game.HEIGHT)/20) *20;
-				foodX = Game.clamp(foodX, 0, Game.WIDTH - 20);
-				foodY = Game.clamp(foodY, 0, Game.HEIGHT - 42);;
-				handler.addObject(new Food( foodX, foodY, ID.Food, handler));
-		
+				game.loadGame();		
 			}
 		
 			//Help button
-			if(mouseOver(mX, mY, 210, 250,200,64)){
+			if(mouseOver(mX, mY, (game.width-game.adjusterX-300)/2, 450, 300, 96)){
 				game.gameState = STATE.Help;
 			}
 			//quit button
-			if(mouseOver(mX, mY, 210, 350,200,64)){
+			if(mouseOver(mX, mY, (game.width-game.adjusterX-300)/2, 600, 300, 96)){
 				System.exit(1);
 
 			}
@@ -75,32 +72,31 @@ public class Menu extends MouseAdapter{
 			
 	
 	public void render(Graphics g){
+		Font font1 = new Font("arial", 1, 80);
+
+		Font font2 = new Font("arial", 1, 40);
+		Font font3 = new Font("arial", 1, 20);
 		if(game.gameState == STATE.Menu){
 			
 		
-		Font font1 = new Font("arial", 1, 50);
-		Font font2 = new Font("arial", 1, 30);
 
 		g.setFont(font1);
 		g.setColor(Color.white);
-		g.drawString("Snake", 240, 70);
+		g.drawString("Snake", (game.width-game.adjusterX)/2-120, 170);
 
 		g.setFont(font2);
-		g.drawRect(210, 150, 200, 64);
-		g.drawString("Play", 270, 190);
+		g.drawRect((game.width-game.adjusterX-300)/2, 300, 300, 96);
+		g.drawString("Play", (game.width-game.adjusterX)/2-40, 360);
 
 
-		g.drawRect(210, 250, 200, 64);
-		g.drawString("Help", 270, 290);
+		g.drawRect((game.width-game.adjusterX-300)/2, 450, 300, 96);
+		g.drawString("Help", (game.width-game.adjusterX)/2-40, 510);
 
 		
-		g.drawRect(210, 350, 200, 64);
-		g.drawString("Quit", 270, 390);
+		g.drawRect((game.width-game.adjusterX-300)/2, 600, 300, 96);
+		g.drawString("Quit", (game.width-game.adjusterX)/2-40, 660);
 		}else if(game.gameState == STATE.Help){
-			Font font1 = new Font("arial", 1, 50);
-
-			Font font2 = new Font("arial", 1, 30);
-			Font font3 = new Font("arial", 1, 20);
+			
 
 			g.setFont(font1);
 			g.setColor(Color.white);
@@ -110,25 +106,27 @@ public class Menu extends MouseAdapter{
 			g.drawString("I'll do this later!!!", 50, 200);
 			g.setFont(font2);
 
-			g.drawRect(210, 350, 200, 64);
-			g.drawString("Back", 270, 390);
+			g.drawRect((game.width-game.adjusterX-300)/2, 600, 300, 96);
+			g.drawString("Back", (game.width-game.adjusterX)/2-40, 660);
 		}
 		else if(game.gameState == STATE.End){
-			Font font1 = new Font("arial", 1, 50);
-
-			Font font2 = new Font("arial", 1, 30);
-			Font font3 = new Font("arial", 1, 20);
+			
 
 			g.setFont(font1);
 			g.setColor(Color.white);
-			g.drawString("Game Over!", 170, 70);
-			g.setFont(font3);
+			g.drawString("Game Over!", game.width/2-240, 70);
+			g.setFont(font2);
 			
 			g.drawString("You lost with a score of " + Snake.snakeSize + "!", 50, 140);
+			g.drawString("Yo B I'll finish this later!", 50, 190);
+
 			g.setFont(font2);
 
-			g.drawRect(210, 350, 200, 64);
-			g.drawString("Try Again", 240, 390);
+			g.drawRect((game.width-game.adjusterX-300)/4, 600, 300, 96);
+			g.drawString("Try Again", (game.width-game.adjusterX)/4 -10, 660);
+			
+			g.drawRect((game.width-game.adjusterX-300)/4 * 3, 600, 300, 96);
+			g.drawString("Quit", (game.width-game.adjusterX)/4 *3 - 120 , 660);
 		}
 
 	}

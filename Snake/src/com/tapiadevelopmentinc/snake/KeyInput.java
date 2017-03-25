@@ -17,7 +17,8 @@ public class KeyInput extends KeyAdapter {
 	public void keyPressed(KeyEvent e){
 		int currKey = e.getKeyCode();
 		//System.out.println(currKey);
-		
+		if(Game.counter != 0){
+			Game.counter = 0;
 			GameObject tempObject = handler.object.get(0);
 			if(tempObject.getID() == ID.Snake){
 				//key events for player 1
@@ -29,7 +30,7 @@ public class KeyInput extends KeyAdapter {
 					vertical = true;
 					horizontal = false;
 				}
-				if(currKey == DOWN && !vertical){
+				else if(currKey == DOWN && !vertical){
 					//System.out.println("down");
 					tempObject.setVert(2);
 					tempObject.setHoriz(0);
@@ -37,7 +38,7 @@ public class KeyInput extends KeyAdapter {
 					vertical = true;
 					horizontal = false;
 				}
-				if(currKey == RIGHT && !horizontal){
+				else if(currKey == RIGHT && !horizontal){
 					//System.out.println("right");
 					tempObject.setVert(0);
 					tempObject.setHoriz(2);
@@ -46,7 +47,7 @@ public class KeyInput extends KeyAdapter {
 					vertical = false;
 
 				}
-				if(currKey == LEFT && !horizontal){
+				else if(currKey == LEFT && !horizontal){
 					//System.out.println("left");
 					tempObject.setVert(0);
 					tempObject.setHoriz(1);
@@ -57,6 +58,7 @@ public class KeyInput extends KeyAdapter {
 				}
 
 			}
+		}
 		
 		
 		if(currKey == KeyEvent.VK_ESCAPE) System.exit(1);

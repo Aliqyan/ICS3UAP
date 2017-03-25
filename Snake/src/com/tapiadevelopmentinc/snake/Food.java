@@ -10,7 +10,7 @@ public class Food extends GameObject {
 	Handler handler;
 	static int x;
 	static int y;
-	
+	int foodSize = Snake.snakeDimension;
 	@SuppressWarnings("static-access")
 	public Food(int x, int y, ID id, Handler handler) {
 		super(x,y, id);
@@ -28,14 +28,14 @@ public class Food extends GameObject {
 	public void render(Graphics g) {
 		g.setColor(Color.red);
 
-		g.fillOval(x+1, y+1, 18, 18);
+		g.fillOval(x+4, y+4, foodSize-8, foodSize-8);
 		
 		
 	}
 
 	@Override
 	public Rectangle getBounds() {
-		return new Rectangle(x, y, 20, 20);
+		return new Rectangle(x, y, foodSize, foodSize);
 	}
 
 }
