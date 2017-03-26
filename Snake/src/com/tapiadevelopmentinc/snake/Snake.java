@@ -19,8 +19,8 @@ public class Snake extends GameObject {
 	ArrayList<Integer> positionX = new ArrayList<Integer>();
 	ArrayList<Integer> positionY = new ArrayList<Integer>();
 	int dir = 0;
-	static int snakeDimension = 40;
 
+	static int snakeDimension = 40;
 	public Snake(int x, int y, ID id, Handler handler) {
 		super(x, y, id);
 		
@@ -72,9 +72,9 @@ public class Snake extends GameObject {
 		positionX.add(0, x);
 		positionY.add(0, y);
 		
-		System.out.println(positionX);
-		System.out.println(positionY);
-		System.out.println();
+		//System.out.println(positionX);
+		//System.out.println(positionY);
+		//System.out.println();
 		
 		if(positionX.size() > 1000){
 			positionX.subList(1000, positionX.size()).clear();
@@ -82,7 +82,7 @@ public class Snake extends GameObject {
 
 		}
 		collision();
-		if(snakeSize >= 5 && snakeCollision()){
+		if((snakeSize >= 3 && snakeCollision())){
 			try {
 				Thread.sleep(1000);
 			} catch (InterruptedException e) {

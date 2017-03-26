@@ -31,6 +31,7 @@ public class Game extends Canvas implements Runnable {
 		Menu,
 		Help,
 		Game,
+		Pause,
 		End
 	};
 	
@@ -63,7 +64,7 @@ public class Game extends Canvas implements Runnable {
 
 		this.addKeyListener(new KeyInput(handler));
 		this.addMouseListener(menu);
-		new Window("Snake!", width, height, this);
+		new Window("Snake", width, height, this);
 		if(gameState == STATE.Game){
 			loadGame();
 		}
@@ -72,7 +73,7 @@ public class Game extends Canvas implements Runnable {
 
 	}
 	public void loadGame(){
-		handler.addObject(new Snake( (int)((width/2 - snakeDimension)/snakeDimension) *snakeDimension , (int)((height/2 - snakeDimension)/snakeDimension) * snakeDimension, ID.Snake, handler));
+		handler.addObject(new Snake( (int)((width/2 - snakeDimension/2)/snakeDimension) *snakeDimension , (int)((height/2 - snakeDimension)/snakeDimension) * snakeDimension, ID.Snake, handler));
 		
 		int foodX = (int)((Math.random() * width)/snakeDimension) *snakeDimension;
 		int foodY = (int)((Math.random() * height)/snakeDimension) *snakeDimension;
@@ -125,9 +126,11 @@ public class Game extends Canvas implements Runnable {
 			e.printStackTrace();
 		}
 	}
+
 	public static int counter = 0;
 	private void render() {
 		counter++;
+		//System.out.println(counter);
 		BufferStrategy bs = this.getBufferStrategy();
 		if(bs == null){
 			this.createBufferStrategy(3);
@@ -141,16 +144,23 @@ public class Game extends Canvas implements Runnable {
 		
 
 		if(gameState == STATE.Game){
-			Font currentFont = g.getFont();
-			int fontSize = (int) (currentFont.getSize() *2F);
-			Font newFont = new Font("Courier New", 1, fontSize);
+			
+			Font newFont = new Font("Courier New", 1, 50);
 			g.setFont(newFont);
 			g.setColor(Color.white);
-			g.drawString("Score: " + Snake.snakeSize, 20, 35);
+			g.drawString("Score: " + Snake.snakeSize, 20, 55);
 			handler.render(g);
 			
 		}else if(gameState == STATE.Menu ||gameState == STATE.Help || gameState == STATE.End){
 			menu.render(g);
+		}else if( gameState == STATE.Pause){
+			Font newFont = new Font("Courier New", 1, 50);
+			g.setFont(newFont);
+			g.setColor(Color.white);
+			g.drawString("Score: " + Snake.snakeSize, 20, 55);
+			handler.render(g);
+			menu.render(g);
+
 		}
 		
 		
